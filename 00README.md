@@ -1,5 +1,8 @@
 https://r-pkgs.org/code.html
 
+# devtools::document(), dann kann man mit ?LM die help-pages
+# der funktionen bekommen
+
 # To-Do:
 
 # .) Output in LM masterfunktion geben

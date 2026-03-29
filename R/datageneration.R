@@ -2,10 +2,16 @@
 #'
 #' @param n integer specifiyng number of observations
 #' @param beta true linear relationship between response and predictors for CLEAN data (Inliers)
-#' @param O in [0,1]: percentage of data to be corrupted (O..Outliers)
+#' @param O in 0,1: percentage of data to be corrupted \(O..Outliers\)
 #' @param OO worst range for Outliers
 #' @param scenario as specified in seminar-paper
 #' @returns named list of class LM
+#' @examples
+#'   data<-corrupt_data(n=100, scenario="a",O=0.1)
+#'   head(data$data)
+#'   data$beta
+#'   data$form
+#'
 #' @importFrom stats rnorm
 #' @export
 corrupt_data <- function(n, scenario=c("a", "b", "c"),

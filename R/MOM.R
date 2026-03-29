@@ -25,6 +25,15 @@ admm<-function(X,y,rho,z,u){
 #' @param K number of blocks
 #' @param b coefficient candidate
 #' @param b_prime another coefficient candidate
+#' @examples
+#'  data<-uniLM::corrupt_data(n=100,scenario="a",O=0.1)
+#'  X<-model.matrix(data$form,data=data$data)
+#   y<-data$data[,all.vars(data$form)[1]]
+#
+#'  med_block(X=X,y=y,K=20,
+#'  b=rep(0,length(data$beta)),
+#'  b_prime=data$beta
+#'  )
 #' @returns named list with X and y of median block
 #' @export
 med_block <- function(X,y,K,b,b_prime){
@@ -57,6 +66,12 @@ med_block <- function(X,y,K,b,b_prime){
 #' @param K integer specifying number of blocks for MOM-algorithm
 #' @param algorithm specifying how to get coefficients, GD (gradient-descent), ADMM(ascent-descent)
 #' @returns named list with final b (coefficients), iterative objectives and errors
+#' @examples
+#'   data<-uniLM::corrupt_data(n=100,scenario="a",O=0.1)
+#'   res<-MOM(data, K=12, algorithm="GD",maxiter=100)
+#'   plot(0:100, res$mom_obj)
+#'   plot(0:100, res$mom_err)
+#'   abs(res$b-true_beta)
 #' @export
 MOM.LM <- function(data, K, algorithm=c("GD", "ADMM"),
                    stepsize=0.01,

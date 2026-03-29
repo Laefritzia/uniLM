@@ -1,14 +1,20 @@
 Package: uniLM
-Title: What the Package Does (One Line, Title Case)
+Title: unified framework robust linear models
 Version: 0.0.0.9000
 Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"))
-Description: What the package does (one paragraph).
+    c(
+    person("Laetitia", "Fritz", , "leablahout@gmail.com", role = c("aut", "cre"))
+    person("Sarah", "Dvorak", , "sarah@dvoraks.at", role = c("aut", "cre"))
+    )
+Description: robust estimation with MOM, generate corrupt data, diagnostics
 License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
     license
 Encoding: UTF-8
 Imports: 
     stats,
+    tibble,
     ggplot2
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
+
+

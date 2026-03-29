@@ -76,6 +76,10 @@ LM <- function(form, data, beta=NULL){
 #' @param data object of class LM \(contains true beta and formula\)
 #' @param type string specifying if response, standardized, or studentized residuals
 #' @returns vector of residuals
+#' @examples
+#'   data<-uniLM::corrupt_data(n=100,scenario="a",O=0.1)
+#'   r_t <- residuals(data,type="student")
+#'   head(r_t)
 #' @export
 residuals.LM <- function(data, type=c("response", "standard", "student")){
 
@@ -117,7 +121,15 @@ residuals.LM <- function(data, type=c("response", "standard", "student")){
 #'
 #' @param data object of class LM \(contains true beta and formula\)
 #' @param plot TRUE draws plot, FALSE stores diagnostic values
+#' @param which can specify plots to be drawn
 #' @returns plot output or named list with values
+#' @examples
+#'   data<-uniLM::corrupt_data(n=100, scenario="a",O=0.1)
+#'   plot(data,which=3)
+#'
+#'   plot_data<-plot(data,plot=FALSE)
+#'   head(plot_data$cook_d)
+#'
 #' @import ggplot2 tibble stats
 #' @export
 plot.LM <- function(data, plot=TRUE, which=1:4, ...){
