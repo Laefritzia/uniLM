@@ -130,7 +130,7 @@ residuals.LM <- function(data, type=c("response", "standard", "student")){
 #'   plot_data<-plot(data,plot=FALSE)
 #'   head(plot_data$cook_d)
 #'
-#' @import ggplot2 tibble stats
+#' @import ggplot2 stats
 #' @export
 plot.LM <- function(data, plot=TRUE, which=1:4, ...){
 
@@ -159,10 +159,8 @@ plot.LM <- function(data, plot=TRUE, which=1:4, ...){
 
   if(plot){
 
-    p_out<-which %in% c(1:4)
-
     # Plot 1: fitted vs standardized studentized res
-    g1<- tibble(x=sqrt(abs(r_t)), y=yhat) |>
+    g1<- data.frame(x=sqrt(abs(r_t)), y=yhat) |>
       ggplot(aes(x, y))+
       geom_point(alpha=0.5) +
       geom_line(data=tibble(
@@ -174,7 +172,7 @@ plot.LM <- function(data, plot=TRUE, which=1:4, ...){
 
 
     # Plot 2: studentized res vs. leverage
-    g2 <- tibble(x=diag(H), y=r_t) |>
+    g2 <- data.frame(x=diag(H), y=r_t) |>
       ggplot(aes(x,y))+
       geom_point(alpha=0.5) +
       labs(title="Studentized residuals~leverage",
@@ -182,7 +180,7 @@ plot.LM <- function(data, plot=TRUE, which=1:4, ...){
 
 
     # Plot 3: Cook plot (red line is treshhold for outlier)
-    g3 <- tibble(x=1:n, y=cook_d) |>
+    g3 <- data.frame(x=1:n, y=cook_d) |>
       ggplot(aes(x,y))+
       geom_col() +
       geom_hline(yintercept=4/n, color="red") +
@@ -203,7 +201,7 @@ plot.LM <- function(data, plot=TRUE, which=1:4, ...){
     b <- yq[1]-a*xq[1] # y= a*x + b
 
     # vielleicht kann man das noch besser zoomen
-    g4 <- tibble(x=qnorm((1:n)/n - 0.01), y=sort(ehat)) |>
+    g4 <- data.frame(x=qnorm((1:n)/n - 0.01), y=sort(ehat)) |>
       ggplot(aes(x,y)) +
       geom_point(alpha=0.5)+
       geom_abline(aes(intercept=b,slope=a),color="Darkblue")+#color="robust"))+

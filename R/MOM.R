@@ -117,7 +117,7 @@ iter<-iter+1
   mom_obj[iter]<- sum((X%*%b-y)^2) - sum((X%*%b_prime-y)^2)
   mom_err[iter]<- sqrt(sum((b-beta)^2))
 
-  if(iter>maxiter) break
+  if(iter>=maxiter) break
 }
 
 return(list(
@@ -149,7 +149,7 @@ if(alg%in% "ADMM"){
    mom_obj[iter]<- sum((X%*%b-y)^2) - sum((X%*%b_prime-y)^2)
    mom_err[iter]<- sqrt(sum((b-beta)^2))
 
-   if(iter>maxiter) break
+   if(iter>=maxiter) break
  }
 
  return(list(

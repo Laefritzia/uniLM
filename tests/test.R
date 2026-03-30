@@ -24,8 +24,8 @@ if(FALSE){
   #sum((data$data$clean%in%0)*8);sum((data$data$clean%in%0)*2)
   #K<-K_grid[which.min(res)]
   r1<-MOM.LM(data, K=K_grid[which.min(res)], algorithm="GD",maxiter=100)
-  plot(0:100, r1$mom_obj)
-  plot(0:100, r1$mom_err)
+  plot(1:100, r1$mom_obj)
+  plot(1:100, r1$mom_err)
   abs(r1$b-data$beta)
 
   clean<-data$data$clean %in% 1
@@ -53,8 +53,8 @@ if(FALSE){
       sum((x$b-data$beta)^2)
     })
   r2<-MOM.LM(data, K=K_grid[which.min(res2)], algorithm="ADMM",maxiter=100)
-  plot(0:100, r2$mom_obj)
-  plot(0:100, r2$mom_err)
+  plot(1:100, r2$mom_obj)
+  plot(1:100, r2$mom_err)
   abs(r2$b-data$beta)
 
 
