@@ -112,7 +112,7 @@ residuals.LM <- function(data, type=c("response", "standard", "student")){
   return(switch(t,
          "response"=ehat,
          "standard"=r_std,
-         "student" =r_std))
+         "student" =r_t))
 
 }
 
