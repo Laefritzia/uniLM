@@ -16,14 +16,14 @@ if(FALSE){
   # >> Subgradient -----------------
   res<- sapply( # looking for best K
     lapply(K_grid, function(K){
-      MOM.LM(data, K=K, algorithm="GD",maxiter=20)
+      MOM(data, K=K, algorithm="GD",maxiter=20)
     }),
     function(x){
       sum((x$b-data$beta)^2)
     })
   #sum((data$data$clean%in%0)*8);sum((data$data$clean%in%0)*2)
   #K<-K_grid[which.min(res)]
-  r1<-MOM.LM(data, K=K_grid[which.min(res)], algorithm="GD",maxiter=100)
+  r1<-MOM(data, K=K_grid[which.min(res)], algorithm="GD",maxiter=100)
   plot(1:100, r1$mom_obj)
   plot(1:100, r1$mom_err)
   abs(r1$b-data$beta)
@@ -47,12 +47,12 @@ if(FALSE){
   # >> ADMM -----------------
   res2<- sapply( # looking for best K
     lapply(K_grid, function(K){
-      MOM.LM(data, K=K, algorithm="ADMM",maxiter=20)
+      MOM(data, K=K, algorithm="ADMM",maxiter=20)
     }),
     function(x){
       sum((x$b-data$beta)^2)
     })
-  r2<-MOM.LM(data, K=K_grid[which.min(res2)], algorithm="ADMM",maxiter=100)
+  r2<-MOM(data, K=K_grid[which.min(res2)], algorithm="ADMM",maxiter=100)
   plot(1:100, r2$mom_obj)
   plot(1:100, r2$mom_err)
   abs(r2$b-data$beta)

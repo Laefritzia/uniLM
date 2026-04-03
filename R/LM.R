@@ -17,30 +17,30 @@ validate_LM <- function(x){
     stop("Data must only consist of numeric columns. Use factor() for ranked/binary data.")
   }
 
-  x$form<-tryCatch(
-    as.formula(form),
-    error=function(e){
-      stop("Must supply regression formula in string/formula-format")
-    }
-  )
+  # x$form<-tryCatch(
+  #   as.formula(form),
+  #   error=function(e){
+  #     stop("Must supply regression formula in string/formula-format")
+  #   }
+  # )
 
-  nfCols_bf<-sapply(x$data, function(d) is.numeric(d) | is.factor(d))
-  x$data[,!nfCols] <- tryCatch(
-    { cCols<-names(x$data[,!nfCols,drop=FALSE])
-     sapply(cCols, function(c){
-       factor(x$data[[c]])
-     })
-    },
-    error=function(e){
-      stop("Conversion of character- to factor-columns failed. Please supply\n
-           numeric or factor cols")
-    }
-  )
-  nfCols_af<-sapply(x$data, function(d) is.numeric(d) | is.factor(d))
-
-  if(any(!nfCols_ad)){
-    stop("Data contains invalid columns (character, numeric or factor allowed).")
-  }
+  # nfCols_bf<-sapply(x$data, function(d) is.numeric(d) | is.factor(d))
+  # x$data[,!nfCols] <- tryCatch(
+  #   { cCols<-names(x$data[,!nfCols,drop=FALSE])
+  #    sapply(cCols, function(c){
+  #      factor(x$data[[c]])
+  #    })
+  #   },
+  #   error=function(e){
+  #     stop("Conversion of character- to factor-columns failed. Please supply\n
+  #          numeric or factor cols")
+  #   }
+  # )
+  # nfCols_af<-sapply(x$data, function(d) is.numeric(d) | is.factor(d))
+#
+#   if(any(!nfCols_ad)){
+#     stop("Data contains invalid columns (character, numeric or factor allowed).")
+#   }
 
   if(nrow(x$data)<2){
     stop("To few data points regression.")
@@ -54,13 +54,13 @@ validate_LM <- function(x){
   if(!is.numeric(x$beta)){
     stop("Beta must be a numeric vector")
   }
-
-  x$form<-tryCatch(
-    as.formula(form),
-    error=function(e){
-      stop("Must supply regression formula in string/formula-format")
-    }
-  )
+#
+#   x$form<-tryCatch(
+#     as.formula(form),
+#     error=function(e){
+#       stop("Must supply regression formula in string/formula-format")
+#     }
+#   )
 
 
  if(length(x$beta) != length(all.vars(x$form))){
@@ -192,7 +192,7 @@ plot.LM <- function(data, plot=TRUE, which=1:4, ...){
     g1<- data.frame(x=sqrt(abs(r_t)), y=yhat) |>
       ggplot(aes(x, y))+
       geom_point(alpha=0.5) +
-      geom_line(data=tibble(
+      geom_line(data=data.frame(
         x=sqrt(abs(r_t)),
         y=stats::lowess(sqrt(abs(r_t)), yhat)$y),
         aes(x,y),color="Darkblue") +
