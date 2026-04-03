@@ -1,19 +1,47 @@
 
 # > 1a ------------------
-new_LM <- function(res){# internal constructor
+# internal constructor
+new_LM <- function(res){
   obj <- structure(res, class="LM")
   #attributes(obj, "strat_var") <- strat_var # kann hier noch Sachen reingebn
   obj
 }
 
 # > 1b ------------------
-validate_LM <- function(x){ # for internal checks
+# for internal checks
+validate_LM <- function(x){
   if (!inherits(x$data, "data.frame")){
     stop("Data must be data.frame object.")
   }
   if(any(!sapply(x$data,is.numeric))) {
     stop("Data must only consist of numeric columns. Use factor() for ranked/binary data.")
   }
+
+  x$form<-tryCatch(
+    as.formula(form),
+    error=function(e){
+      stop("Must supply regression formula in string/formula-format")
+    }
+  )
+
+  nfCols_bf<-sapply(x$data, function(d) is.numeric(d) | is.factor(d))
+  x$data[,!nfCols] <- tryCatch(
+    { cCols<-names(x$data[,!nfCols,drop=FALSE])
+     sapply(cCols, function(c){
+       factor(x$data[[c]])
+     })
+    },
+    error=function(e){
+      stop("Conversion of character- to factor-columns failed. Please supply\n
+           numeric or factor cols")
+    }
+  )
+  nfCols_af<-sapply(x$data, function(d) is.numeric(d) | is.factor(d))
+
+  if(any(!nfCols_ad)){
+    stop("Data contains invalid columns (character, numeric or factor allowed).")
+  }
+
   if(nrow(x$data)<2){
     stop("To few data points regression.")
   }
@@ -26,6 +54,14 @@ validate_LM <- function(x){ # for internal checks
   if(!is.numeric(x$beta)){
     stop("Beta must be a numeric vector")
   }
+
+  x$form<-tryCatch(
+    as.formula(form),
+    error=function(e){
+      stop("Must supply regression formula in string/formula-format")
+    }
+  )
+
 
  if(length(x$beta) != length(all.vars(x$form))){
    stop("Regression formula doesnt match length of true beta.\nBeta must include intercept???")
@@ -41,25 +77,18 @@ x
 #' @param beta for simulation purposes: true linear relationship between response and predictors
 #' @returns named list of class LM
 #' @export
-LM <- function(form, data, beta=NULL){
+LM <- function(data, form, beta=NULL){
   # To-DO:
   # output und form des outputs reingeben
   # sollten mit intercept dealen (attributes(terms(formula)))
 
-  form<-tryCatch(
-    as.formula(form),
-    error=function(e){
-      stop("Must supply regression formula in string/formula-format")
-    }
-    )
+  res <- validate_LM(new_LM(list(data=data,beta=beta,form=form)))
 
-  if(is.null(beta)){
-    beta<-rep(0, length(all.vars(form))) # deal with intercept
+  if(is.null(res$beta)){
+    res$beta<-rep(0, length(all.vars(res$form))) # deal with intercept
   }
 
-  res<-new_LM(
-    list(data=data,beta=beta,form=form)
-  )
+
 
   # wollen returnen: coefficient (MOM), resiudals, fitted,
   # varianz: welche?

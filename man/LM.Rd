@@ -4,12 +4,12 @@
 \alias{LM}
 \title{Robust linear model}
 \usage{
-LM(form, data, beta = NULL)
+LM(data, form, beta = NULL)
 }
 \arguments{
-\item{form}{formula for linear model}
-
 \item{data}{data.frame with regression data}
+
+\item{form}{formula for linear model}
 
 \item{beta}{for simulation purposes: true linear relationship between response and predictors}
 }
