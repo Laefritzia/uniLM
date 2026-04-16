@@ -9,7 +9,7 @@ med_block(X, y, K, b, b_prime)
 \arguments{
 \item{X}{model.matrix containing covariates and intercept.}
 
-\item{y}{numeric response vector}
+\item{y}{numeric response vector (hallo Sarah)}
 
 \item{K}{number of blocks}
 

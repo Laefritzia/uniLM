@@ -99,6 +99,23 @@ LM <- function(data, form, beta=NULL){
 
 }
 
+# > 2.2 ------------------
+#' summary method for class LM
+#'
+#' @param data object of class LM \(contains true beta and formula\)
+#' @returns something super duper amazing
+#' @export
+
+summary.LM <- function(data){
+
+  # Checks:
+  if(!inherits(data, "LM")){
+    stop("Data must be of class LM (eg 'uniLM::LM()',uniLM::corrupt_data()')")
+  }
+  invisible(validate_LM(data))
+
+}
+
 # > 3 ------------------
 #' residuals method for class LM
 #'

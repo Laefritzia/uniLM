@@ -23,7 +23,7 @@ MOM(data, form = NULL, beta = NULL, K, algorithm = c("GD", "ADMM"), ...)
 
 \item{algorithm}{specifying how to get coefficients, GD (gradient-descent), ADMM(ascent-descent)}
 
-\item{...}{optional arguments like stepsize, maxiter,...}
+\item{...}{optional arguments like stepsize, maxiter, ...}
 }
 \value{
 named list with final b (coefficients), iterative objectives and errors
