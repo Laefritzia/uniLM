@@ -4,18 +4,20 @@
 \alias{med_block}
 \title{chooses block based on MOM: median of means}
 \usage{
-med_block(X, y, K, b, b_prime)
+med_block(X, y, K, b, b_prime, blocks = NULL)
 }
 \arguments{
 \item{X}{model.matrix containing covariates and intercept.}
 
-\item{y}{numeric response vector (hallo Sarah)}
+\item{y}{numeric response vector}
 
 \item{K}{number of blocks}
 
 \item{b}{coefficient candidate}
 
 \item{b_prime}{another coefficient candidate}
+
+\item{blocks}{supply block-partition of the data (eg fixed blocks or reshuffled each iteration)}
 }
 \value{
 named list with X and y of median block
@@ -25,7 +27,7 @@ chooses block based on MOM: median of means
 }
 \examples{
  data<-uniLM::corrupt_data(n=100,scenario="a",O=0.1)
- X<-model.matrix(data$form,data=data$data)
+ X<-model.matrix(data$formula,data=data$data)
  med_block(X=X,y=y,K=20,
  b=rep(0,length(data$beta)),
  b_prime=data$beta

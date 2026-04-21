@@ -6,16 +6,43 @@
 \alias{MOM.LM}
 \title{robust MOM-estimator for linear regression}
 \usage{
-MOM(data, form = NULL, beta = NULL, K, algorithm = c("GD", "ADMM"), ...)
+MOM(
+  data,
+  formula = NULL,
+  beta = NULL,
+  K,
+  algorithm = c("GD", "ADMM"),
+  stochastic = TRUE,
+  nboot = 0,
+  ...
+)
 
-\method{MOM}{default}(data, form, beta, K, algorithm = c("GD", "ADMM"), ...)
+\method{MOM}{default}(
+  data,
+  formula,
+  beta,
+  K,
+  algorithm = c("GD", "ADMM"),
+  stochastic = TRUE,
+  nboot = 0,
+  ...
+)
 
-\method{MOM}{LM}(data, form = NULL, beta = NULL, K, algorithm = c("GD", "ADMM"), ...)
+\method{MOM}{LM}(
+  data,
+  formula = NULL,
+  beta = NULL,
+  K,
+  algorithm = c("GD", "ADMM"),
+  stochastic = TRUE,
+  nboot = 0,
+  ...
+)
 }
 \arguments{
 \item{data}{data.frame containing regression data}
 
-\item{form}{formula specifiyng the relationship of response and predictors in data}
+\item{formula}{formula specifiyng the relationship of response and predictors in data}
 
 \item{beta}{true coefficient for relationship (for simulation purposes)}
 
@@ -23,7 +50,12 @@ MOM(data, form = NULL, beta = NULL, K, algorithm = c("GD", "ADMM"), ...)
 
 \item{algorithm}{specifying how to get coefficients, GD (gradient-descent), ADMM(ascent-descent)}
 
-\item{...}{optional arguments like stepsize, maxiter, ...}
+\item{stochastic}{TRUE/FALSE decides, if blocks should be shuffled randomly in every iteration (stochastic==TRUE)
+or based on a fixed starting partition (stochastic==FALSE)}
+
+\item{nboot}{for variance estimation: number of bootstrap iterations (with resampling blocks...stochastic==TRUE)}
+
+\item{...}{optional arguments like stepsize, maxiter, seed, ...}
 }
 \value{
 named list with final b (coefficients), iterative objectives and errors

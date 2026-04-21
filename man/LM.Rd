@@ -4,12 +4,21 @@
 \alias{LM}
 \title{Robust linear model}
 \usage{
-LM(data, form, beta = NULL)
+LM(
+  data,
+  formula,
+  MOMalgorithm = c("GD", "ADMM"),
+  stochastic = stochastic,
+  nboot = 0,
+  beta = NULL
+)
 }
 \arguments{
 \item{data}{data.frame with regression data}
 
-\item{form}{formula for linear model}
+\item{formula}{formula for linear model}
+
+\item{MOMalgorithm}{specifies algorithm to find minimax mom-estimator}
 
 \item{beta}{for simulation purposes: true linear relationship between response and predictors}
 }

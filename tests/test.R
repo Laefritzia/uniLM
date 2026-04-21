@@ -48,6 +48,10 @@ if(FALSE){
   sum(r1$scores[clean]== 0)
   sum(r1_s$scores[clean]== 0)
 
+  clean[r1$scores > (1/K_grid[which.min(res)])]
+  clean[r1_s$scores >(1/K_grid[which.min(res_s)])]
+
+
   M<-matrix(0,nrow=10,ncol=6)
   colnames(M)<-c(apply(
     expand.grid(c("rob", "stoch"), c("_CleanScore", "_UncleanScore")),
@@ -157,3 +161,23 @@ if(FALSE){
 
 }
 
+
+# with stochastic blocks - bootstrap like variance
+
+K_grid<-2:(nrow(data$data)/2)
+
+gridres<- sapply( # looking for best K
+  lapply(K_grid, function(K){
+    MOM(data, K=K, algorithm="ADMM",maxiter=20,stochastic=TRUE,nboot=0)
+  }),
+  function(x){
+    sum((x$b-data$beta)^2)
+  })
+
+
+system.time({
+res<-MOM(data, K=K_grid[which.min(gridres)], algorithm="ADMM",maxiter=50,stochastic=TRUE,nboot=100)
+})
+res$b
+res$se
+res$scores

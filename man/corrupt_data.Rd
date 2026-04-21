@@ -6,8 +6,8 @@
 \usage{
 corrupt_data(
   n,
-  scenario = c("a", "b", "c"),
-  beta = list(a = c(1, 3), b = NULL, c = NULL),
+  scenario = c("a", "b", "c", "d"),
+  beta = list(a = c(1, 3), b = NULL, c = NULL, d = NULL),
   O = 0.2,
   OO = 100,
   eps_var = 0.3

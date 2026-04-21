@@ -14,8 +14,8 @@
 #'
 #' @importFrom stats rnorm
 #' @export
-corrupt_data <- function(n, scenario=c("a", "b", "c"),
-                        beta=list(a=c(1,3), b=NULL, c=NULL),
+corrupt_data <- function(n, scenario=c("a", "b", "c", "d"),
+                        beta=list(a=c(1,3), b=NULL, c=NULL, d=NULL),
                          O=0.2, OO=100, eps_var=0.3
                         ){
 
@@ -49,9 +49,9 @@ corrupt_data <- function(n, scenario=c("a", "b", "c"),
 
   # building the model
   betaA<-beta$a
-  form<-as.formula("y~x2") # formula
+  formula<-as.formula("y~x2") # formula
   clean<-as.integer(pos%in%"I") # index clean data
-  X <- model.matrix(form, data=data.frame(x2=x2,y=numeric(n))) # Intercept+covariates
+  X <- model.matrix(formula, data=data.frame(x2=x2,y=numeric(n))) # Intercept+covariates
 
   y<- clean*(X%*%betaA+eps) + # Clean data
   (1-clean)*(OO+betaA[1]+X[,-1,drop=FALSE]%*%-betaA[-1]+eps) # corrupt data
@@ -59,7 +59,7 @@ corrupt_data <- function(n, scenario=c("a", "b", "c"),
   res<-new_LM(list(
     data=data.frame(x2=x2,eps=eps,y=y, clean=clean),
     beta=betaA,
-    form=form))
+    formula=formula))
 
   return(validate_LM(res))
   }
@@ -72,3 +72,7 @@ corrupt_data <- function(n, scenario=c("a", "b", "c"),
     return(cat("scenario c to be done"))
   }
 }
+
+
+
+# small ball :)

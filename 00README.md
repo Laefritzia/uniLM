@@ -1,16 +1,29 @@
-https://r-pkgs.org/code.html
+# Installing our package
 
-# devtools::document(), dann kann man mit ?LM die help-pages
-# der funktionen bekommen
+- 1. install the 'remotes' package 
 
-# To-Do:
+if(!("remotes" %in% installed.packages())){
+install.packages("remotes")
+}
 
-# .) Output in LM masterfunktion geben
-# .) Szenarien fuer corrupt data & simulations parameter
-#    .) welche confidenzintervalle???
-# .) schoene plots&Visualisierungen (diagnostics, MOM?)
-# .) in den ganzen Funktionen mit intercept dealen (attributes(terms(formula)))
+- 2. install our package directly from Github:
 
-# devtools::document(), description bearbeiten, vignettes?
+remotes::install_github("Laefritzia/uniLM")
+
+
+# uniLM
+ 
+ - insert: hinweise zwecks public repo fuer uni projekt
+ - insert: kurze erklaerung zu ?help und package use
+
+
+# To-Do
+
+# .) LM: validate LM, Form von LM, bootstrap varianz auch in LM
+# .) MOM: stochastic, scores, plot method for res, outlier detection diagnostic
+# .) Simulation: Szenarien, parameter,varianz und ci
+# .) links in die .rd pages zu den papern geben
+
+# buil package, update description, vignettes?(na passt schon)
 
 
