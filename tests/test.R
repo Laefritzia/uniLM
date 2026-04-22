@@ -5,6 +5,17 @@ if(FALSE){
 
   data<-corrupt_data(n=100, scenario="a",O=0.1) # bis zu 0.2 gehts noch ganz gut, mit 0.1 besser
 
+  dataA<-corrupt_data(n=100, scenario="a",O=0.1)
+  dataB<-corrupt_data(n=100, scenario="b",O=0.1)
+  dataC<-corrupt_data(n=100, scenario="c",O=0.1)
+  dataD<-corrupt_data(n=100, scenario="d",O=0.1)
+
+  data<-dataD$data
+  plot(data$x2,data$y)
+  plot(dataC, which=4)
+
+
+
   # number of blocks K:
   # lepski K: the paper mentions that K (number of blocks)
   # has to be at least 8 bigger than the number of outliers (but
@@ -162,21 +173,11 @@ if(FALSE){
 }
 
 
-# with stochastic blocks - bootstrap like variance
+minK<-adaptK(data=data, algorithm="ADMM")
 
-K_grid<-2:(nrow(data$data)/2)
-
-gridres<- sapply( # looking for best K
-  lapply(K_grid, function(K){
-    MOM(data, K=K, algorithm="ADMM",maxiter=20,stochastic=TRUE,nboot=0)
-  }),
-  function(x){
-    sum((x$b-data$beta)^2)
-  })
-
-
+# approximation von varianz (net wirklich bootstrap aber fuer uns begruendet)
 system.time({
-res<-MOM(data, K=K_grid[which.min(gridres)], algorithm="ADMM",maxiter=50,stochastic=TRUE,nboot=100)
+res<-MOM(data, K=minK, algorithm="ADMM",maxiter=50,stochastic=TRUE,nboot=100)
 })
 res$b
 res$se

@@ -18,7 +18,7 @@ check_1num <-function(x, type=c("int", "intExact", "num", "prob", "pos_num")){
 # > MOM helper ----------
 
 # use inside functions with MOM, where conflicts could arise
-# when specifingy an external beta/formula argument, even tho
+# when specified an external beta/formula argument, even tho
 # these are usually stored inside the LM objects we intend to use for
 # these MOM functions.
 

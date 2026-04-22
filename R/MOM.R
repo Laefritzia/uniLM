@@ -198,18 +198,21 @@ MOM.default <- function(data, formula, beta, K, algorithm=c("GD", "ADMM"),
 
   if (nboot>0){
     for (i in 1:nboot){
-      boots[[i]]<-calculate_mom(data=data, formula=formula, beta=beta, K=K,
+      data_b<- data[sample(1:nrow(data),replace=TRUE) ,]
+      boots[[i]]<-calculate_mom(data=data_b, formula=formula, beta=beta, K=K,
                                 algorithm=algorithm, stochastic=stochastic, ...)
     }
 
+
+    betas<-sapply(boots, function(x) x$b)
+    vcov_b <- cov(t(betas))
     return(list(
-      betas=sapply(boots, function(x) x$b),
+      betas=betas,
       b=rowMeans(betas),
       vcov = cov(t(betas)),
-      se=sqrt(diag(vcov)),
+      se=sqrt(diag(vcov_b)),
       scores=rowMeans(sapply(boots,function(x)x$scores))
     ))
-
   } else{
 
     calculate_mom(data=data, formula=formula, beta=beta, K=K,
@@ -240,15 +243,18 @@ MOM.LM <- function(data, formula=NULL, beta=NULL, K, algorithm=c("GD", "ADMM"),
 
   if (nboot>0){
     for (i in 1:nboot){
+      #data_b<- data[sample(1:nrow(data),replace=TRUE) ,]
       boots[[i]]<-calculate_mom(data=data, formula=formula, beta=beta, K=K,
                                 algorithm=algorithm, stochastic=stochastic, ...)
     }
 
+    betas<-sapply(boots, function(x) x$b)
+    vcov_b <- cov(t(betas))
     return(list(
-      betas=sapply(boots, function(x) x$b),
+      betas=betas,
       b=rowMeans(betas),
       vcov = cov(t(betas)),
-      se=sqrt(diag(vcov)),
+      se=sqrt(diag(vcov_b)),
       scores=rowMeans(sapply(boots,function(x)x$scores))
     ))
 

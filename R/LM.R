@@ -154,7 +154,7 @@ adaptK <- function(data,...){
 
 #' @rdname adaptK
 #' @export
-adaptK.LM <- function(data, K_grid = 2:(nrow(data)/2),
+adaptK.LM <- function(data, K_grid = 2:(nrow(data$data)/2),
                       algorithm=c("GD", "ADMM"), maxiter=20,
                       stochastic=TRUE){
   # Checks:
@@ -162,12 +162,13 @@ adaptK.LM <- function(data, K_grid = 2:(nrow(data)/2),
     stop("Data must be of class LM (eg 'uniLM::LM()',uniLM::corrupt_data()')")
   }
   invisible(validate_LM(data))
-  sapply(K_grid, check1_num, "int")
+  sapply(K_grid, check_1num, "int")
 
+  alg<-match.arg(algorithm)
   # grid search returning euclidean norm between estimate and beta
 
   grid<-sapply(K_grid, function(K){
-    res<-MOM(data, K=K, algorithm=match.arg(algorithm),
+    res<-MOM(data, K=K, algorithm=alg,
              maxiter=maxiter,stochastic=stochastic)
 
     sum((res$b-data$beta)^2)
@@ -177,6 +178,19 @@ adaptK.LM <- function(data, K_grid = 2:(nrow(data)/2),
   return(K_grid[which.min(grid)])
 
 }
+
+# > 2.2 ------------------
+#' print method for class LM
+#'
+#' @param x object of class LM \(contains true beta and formula\)
+#' @returns something super duper amazing
+#' @export
+
+# print.LM <- function(x, ...){
+#
+# }
+
+
 
 
 # > 2.3 ------------------
