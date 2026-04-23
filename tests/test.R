@@ -199,24 +199,32 @@ mod_LM <- LM(dataB,MOMalgorithm="ADMM",nboot=100)
 mod_LM
 
 mod_a<-LM(dataA, MOMalgorithm="ADMM",nboot=10)
-mod_a2<-LM(dataA, MOMalgorithm="GD",nboot=10) # sometimes this is crazy
+mod_a2<-LM(dataA, MOMalgorithm="GD",nboot=10) # sometimes this is crazy#100,#1000
 mod_a
 mod_a2
+mod_a$OLS
+mod_a$M_est
 mod_b<-LM(dataB, MOMalgorithm="ADMM",nboot=10)
 mod_b
+mod_b$OLS
+mod_b$M_est
 mod_c<-LM(dataC, MOMalgorithm="ADMM",nboot=10)
 mod_c
+mod_c$OLS
+mod_c$M_est
+
 
 mod_d<-LM(dataD, MOMalgorithm="ADMM",nboot=10)
 mod_d
-plot(mod_d)
-plot(mod_d$MOM)
 mod_d$OLS # as expected, smaller SE
+mod_d$M_est
+
 
 plot(mod_a$MOM)
 mod_a0<-LM(dataA,MOMalgorithm = "ADMM",nboot=0)
-a0MOM<-plot(mod_a0$MOM)
-a0COOK<-plot(mod_a0)
+a0MOM<-plot(mod_a0$MOM,which=4)
+a0COOK<-plot(mod_a0,which=3)
+plot(mod_a0$MOM,which=3)
 
 
 cook_outs<-which(a0COOK$cook_d > 4/nrow(mod_a0$data))
@@ -225,6 +233,8 @@ mom_outs<-which(a0MOM$outlier_data$outlier %in% "Outlier")
 
 true_outs<-which(mod_a0$data$clean == 0)
 
+true_outs
 mom_outs
 setdiff(mom_outs,true_outs); setdiff(true_outs,mom_outs)
 setdiff(cook_outs,true_outs); setdiff(true_outs,cook_outs)
+

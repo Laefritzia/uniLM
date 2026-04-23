@@ -269,9 +269,12 @@ MOM.LM <- function(data, formula=NULL, beta=NULL, K, algorithm=c("GD", "ADMM"),
 #' @param plot TRUE draws plot, FALSE stores results (including outlier detection)
 #' @param which can specify plots to be drawn
 #' @returns plot output or named list with value
-#' @import ggplot2
+#' @import ggplot2::ggplot2
 #' @export
 plot.MOM <- function(mom, plot=TRUE, which=1:4, ...){
+
+
+  #message("Outlier detection works best without bootstrapping (nboot=0)")
 
   algorithm_data <- data.frame(
     iterations=1:mom$maxiter,
@@ -283,45 +286,63 @@ plot.MOM <- function(mom, plot=TRUE, which=1:4, ...){
     x=1:mom$n, scores=mom$scores
     )
 
-  block_p <- (1/mom$K)*0.5
+  block_p <- (1/mom$K) - sqrt((1-1/mom$K)*(1/mom$K)/mom$n) #minus expected SE (variance of a frequncy: binomial)
 
 
   outlier_data$outlier <- factor(as.integer(outlier_data$scores<=block_p),
                               levels=c(0,1), labels=c("Inlier", "Outlier")
   )
 
+  ylimit<-max(block_p, outlier_data$scores)*1.2
+
 
   if(plot){
 
 suppressMessages({suppressWarnings({
     g1<- algorithm_data |>
-      ggplot(aes(iterations, mom_err))+
-      geom_line(color="Skyblue",lwd=1.5)+
-      labs(title="Error between estimate and true")
+      ggplot2::ggplot(ggplot2::aes(iterations, mom_err))+
+      ggplot2::geom_line(color="Skyblue",lwd=1.5)+
+      ggplot2::labs(title="Error between estimate and true")+
+      ggplot2::theme_minimal()
 
     g2<- algorithm_data |>
-      ggplot(aes(iterations, mom_err))+
-      geom_line(color="Skyblue",lwd=1.5)+
-      labs(title="MOM-objective (distance between the two candidates)")
+      ggplot2::ggplot(ggplot2::aes(iterations, mom_obj))+
+      ggplot2::geom_line(color="Skyblue",lwd=1.5)+
+      ggplot2::labs(title="MOM-objective (distance between the two candidates)")+
+      ggplot2::theme_minimal()
 
     g3 <- outlier_data |>
-      ggplot(aes(x, scores)) +
-      geom_col() +
-      geom_hline(yintercept=block_p, color="red")+
-      geom_text(
-        aes(label=ifelse(outlier_data$scores<=block_p, as.character(x), "")),
+      ggplot2::ggplot(ggplot2::aes(x, scores, fill=scores<=block_p)) +
+      ggplot2::geom_col() +
+      ggplot2::geom_point(ggplot2::aes(color=scores<=block_p))+
+      ggplot2::geom_hline(yintercept=block_p, color="red")+
+      ggplot2::scale_fill_manual(values=c(
+        "TRUE"="#be0032",
+        "FALSE"="#007bb8"
+      ))+
+      ggplot2::scale_color_manual(values=c(
+        "TRUE"="#be0032",
+        "FALSE"="#007bb8"
+      ))+
+      ggplot2::geom_text(
+        ggplot2::aes(label=ifelse(.data$scores<=block_p, as.character(x), "")),
         vjust=-0.8,size=3.5,color="black"
       ) +
-      ylim(c(0, max(block_p, outlier_data$scores)*1.2))+
-      labs(title="Outlier Detection via Median-Block-Frequency",
+      ggplot2::ylim(c(0, ylimit))+
+      ggplot2::labs(title="Outlier Detection via Median-Block-Frequency",
            subtitle=paste0("outlier idx: ",paste(as.character(1:mom$n)[outlier_data$scores<=block_p],collapse=","))
-           )
+           )+
+       ggplot2::theme_minimal()+
+      ggplot2::theme(legend.position = "bottom")
 
     g4 <- outlier_data |>
-      ggplot(aes(outlier,scores, fill=outlier)) +
-      geom_boxplot() +
-      geom_hline(yintercept=block_p, color = "red") +
-      labs(title = "Scores grouped by Outlier Status", x = "Status", y = "scores")
+      ggplot2::ggplot(ggplot2::aes(outlier,scores, fill=outlier)) +
+      ggplot2::geom_boxplot() +
+      #ggplot2::geom_hline(yintercept=block_p, color = "red") +
+      ggplot2::labs(title = "Scores grouped by Outlier Status",
+           subtitle="Scores by Median-Block-Frequency",x = "Status", y = "scores",
+           fill="")+
+      ggplot2::theme_minimal()
 
     plots<-list(g1,g2,g3,g4)
 

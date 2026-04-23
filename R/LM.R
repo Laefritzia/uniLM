@@ -362,38 +362,41 @@ plot.LM <- function(data, plot=TRUE, which=1:4, ...){
 
     # Plot 1: fitted vs standardized studentized res
     g1<- data.frame(x=sqrt(abs(r_t)), y=yhat) |>
-      ggplot(aes(x, y))+
-      geom_point(alpha=0.5) +
-      geom_line(data=data.frame(
+      ggplot2::ggplot(ggplot2::aes(x, y))+
+      ggplot2::geom_point(alpha=0.5) +
+      ggplot2::geom_line(data=data.frame(
         x=sqrt(abs(r_t)),
         y=stats::lowess(sqrt(abs(r_t)), yhat)$y),
-        aes(x,y),color="Darkblue") +
-      labs(x="sqrt(abs(studentized residuals))",
-           title="fitted~sqrt(abs(r_t))")
+        ggplot2::aes(x,y),color="Darkblue") +
+      ggplot2::labs(x="sqrt(abs(studentized residuals))",
+           title="fitted~sqrt(abs(r_t))")+
+      ggplot2::theme_minimal()
 
 
     # Plot 2: studentized res vs. leverage
     g2 <- data.frame(x=diag(H), y=r_t) |>
-      ggplot(aes(x,y))+
-      geom_point(alpha=0.5) +
-      labs(title="Studentized residuals~leverage",
-           x="diag(H)", y="r_t")
+      ggplot2::ggplot(ggplot2::aes(x,y))+
+      ggplot2::geom_point(alpha=0.5) +
+      ggplot2::labs(title="Studentized residuals~leverage",
+           x="diag(H)", y="r_t")+
+      ggplot2::theme_minimal()
 
 
     # Plot 3: Cook plot (red line is treshhold for outlier)
     g3 <- data.frame(x=1:n, y=cook_d) |>
-      ggplot(aes(x,y))+
-      geom_col() +
-      geom_hline(yintercept=4/n, color="red") +
-      geom_text(
-        aes(label=ifelse(y>4/n,as.character(x),"")),
+      ggplot2::ggplot(ggplot2::aes(x,y))+
+      ggplot2::geom_col() +
+      ggplot2::geom_hline(yintercept=4/n, color="red") +
+      ggplot2::geom_text(
+        ggplot2::aes(label=ifelse(y>4/n,as.character(x),"")),
         vjust=-0.8,size=3.5,color = "black"
       ) +
-      ylim(c(0, max((4/n)*1.02,max(cook_d)*1.02)))+
-      labs(x="observations (row index)", y="Cooks Distance",
+      ggplot2::ylim(c(0, max((4/n)*1.02,max(cook_d)*1.02)))+
+      ggplot2::labs(x="observations (row index)", y="Cooks Distance",
            title="Cooks Distance",
            subtitle=paste0("outlier idx: ",paste(as.character(1:n)[cook_d>4/n],collapse=","))
-      )
+      )+
+      ggplot2::theme_minimal()
 
     # Plot 4: QQ-Plot: empirical vs theoretical distribution
     yq <- quantile(ehat,c(0.25, 0.75))
@@ -403,15 +406,16 @@ plot.LM <- function(data, plot=TRUE, which=1:4, ...){
 
     # vielleicht kann man das noch besser zoomen
     g4 <- data.frame(x=qnorm((1:n)/n - 0.01), y=sort(ehat)) |>
-      ggplot(aes(x,y)) +
-      geom_point(alpha=0.5)+
-      geom_abline(aes(intercept=b,slope=a),color="Darkblue")+#color="robust"))+
-      #geom_abline(aes(intercept=mean(ehat),slope=sd(ehat),color="naive"))+
-      labs(x="theoretical quantile", y="residuals", #colour="",
+      ggplot2::ggplot(ggplot2::aes(x,y)) +
+      ggplot2::geom_point(alpha=0.5)+
+      ggplot2::geom_abline(ggplot2::aes(intercept=b,slope=a),color="Darkblue")+#color="robust"))+
+      #ggplot2::geom_abline(ggplot2::aes(intercept=mean(ehat),slope=sd(ehat),color="naive"))+
+      ggplot2::labs(x="theoretical quantile", y="residuals", #colour="",
            title="QQ Plot",
            subtitle="empirical~theoretical normal distribution"
       ) +
-      theme(legend.position="bottom")
+      ggplot2::theme(legend.position="bottom")+
+      ggplot2::theme_minimal()
 
     plots<-list(g1,g2,g3,g4)
 
