@@ -15,6 +15,10 @@ if(FALSE){
   plot(dataC, which=4)
 
 
+  data<-dataB$data
+  plot(data$x2,data$y)
+  plot(dataB, which=4)
+
 
   # number of blocks K:
   # lepski K: the paper mentions that K (number of blocks)
@@ -182,3 +186,45 @@ res<-MOM(data, K=minK, algorithm="ADMM",maxiter=50,stochastic=TRUE,nboot=100)
 res$b
 res$se
 res$scores
+
+
+# -------------
+
+
+dataD <- corrupt_data(n=100, scenario="d", O=0.1)
+dataD
+mod_LM <- LM(dataB)
+mod_LM
+mod_LM <- LM(dataB,MOMalgorithm="ADMM",nboot=100)
+mod_LM
+
+mod_a<-LM(dataA, MOMalgorithm="ADMM",nboot=10)
+mod_a2<-LM(dataA, MOMalgorithm="GD",nboot=10) # sometimes this is crazy
+mod_a
+mod_a2
+mod_b<-LM(dataB, MOMalgorithm="ADMM",nboot=10)
+mod_b
+mod_c<-LM(dataC, MOMalgorithm="ADMM",nboot=10)
+mod_c
+
+mod_d<-LM(dataD, MOMalgorithm="ADMM",nboot=10)
+mod_d
+plot(mod_d)
+plot(mod_d$MOM)
+mod_d$OLS # as expected, smaller SE
+
+plot(mod_a$MOM)
+mod_a0<-LM(dataA,MOMalgorithm = "ADMM",nboot=0)
+a0MOM<-plot(mod_a0$MOM)
+a0COOK<-plot(mod_a0)
+
+
+cook_outs<-which(a0COOK$cook_d > 4/nrow(mod_a0$data))
+
+mom_outs<-which(a0MOM$outlier_data$outlier %in% "Outlier")
+
+true_outs<-which(mod_a0$data$clean == 0)
+
+mom_outs
+setdiff(mom_outs,true_outs); setdiff(true_outs,mom_outs)
+setdiff(cook_outs,true_outs); setdiff(true_outs,cook_outs)

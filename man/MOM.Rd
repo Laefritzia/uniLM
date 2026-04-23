@@ -17,16 +17,7 @@ MOM(
   ...
 )
 
-\method{MOM}{default}(
-  data,
-  formula,
-  beta,
-  K,
-  algorithm = c("GD", "ADMM"),
-  stochastic = TRUE,
-  nboot = 0,
-  ...
-)
+\method{MOM}{default}(data, formula, beta, ...)
 
 \method{MOM}{LM}(
   data,
@@ -53,7 +44,7 @@ MOM(
 \item{stochastic}{TRUE/FALSE decides, if blocks should be shuffled randomly in every iteration (stochastic==TRUE)
 or based on a fixed starting partition (stochastic==FALSE)}
 
-\item{nboot}{for variance estimation: number of bootstrap iterations (with resampling blocks...stochastic==TRUE)}
+\item{nboot}{integer controlling how many times MOM-algorithm should be repeated on a resampled (with replacement) dataset.}
 
 \item{...}{optional arguments like stepsize, maxiter, seed, ...}
 }
@@ -66,7 +57,5 @@ robust MOM-estimator for linear regression
 \examples{
   data<-uniLM::corrupt_data(n=100,scenario="a",O=0.1)
   res<-MOM(data, K=12, algorithm="GD")
-  plot(0:100, res$mom_obj)
-  plot(0:100, res$mom_err)
   abs(res$b-true_beta)
 }

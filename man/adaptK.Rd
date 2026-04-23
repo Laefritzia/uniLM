@@ -2,21 +2,40 @@
 % Please edit documentation in R/LM.R
 \name{adaptK}
 \alias{adaptK}
+\alias{adaptK.default}
 \alias{adaptK.LM}
 \title{choose the best block-partition for MOM-algorithm in LM-framework}
 \usage{
-adaptK(data, ...)
+adaptK(
+  data,
+  formula = NULL,
+  beta = NULL,
+  K_grid = 2:(nrow(data$data)/2),
+  algorithm = c("GD", "ADMM"),
+  maxiter = 20,
+  stochastic = TRUE,
+  ...
+)
+
+\method{adaptK}{default}(data, formula, beta, ...)
 
 \method{adaptK}{LM}(
   data,
-  K_grid = 2:(nrow(data)/2),
+  formula = NULL,
+  beta = NULL,
+  K_grid = 2:(nrow(data$data)/2),
   algorithm = c("GD", "ADMM"),
   maxiter = 20,
-  stochastic = TRUE
+  stochastic = TRUE,
+  ...
 )
 }
 \arguments{
 \item{data}{data.frame of class LM (in simplest form a list containing data, formula and beta)}
+
+\item{formula}{formula for linear model}
+
+\item{beta}{for simulation purposes: true linear relationship between response and predictors}
 
 \item{K_grid}{integers specifying number of blocks for MOM-algorithm}
 

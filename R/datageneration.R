@@ -60,6 +60,7 @@ corrupt_data <- function(n, scenario=c("a", "b", "c", "d"),
   # drawing (and shuffling) Inliers and Outliers based on O-probabilities
   pos<-factor(
     sample(1:3, n, prob = c(1-O, O/2, O/2), replace=TRUE),
+    levels=1:3,
     labels=c("I", "O1", "O2")
   )
 

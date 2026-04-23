@@ -7,7 +7,7 @@
 corrupt_data(
   n,
   scenario = c("a", "b", "c", "d"),
-  beta = list(a = c(1, 3), b = NULL, c = NULL, d = NULL),
+  beta = c(1, 3),
   O = 0.2,
   OO = 100,
   eps_var = 0.3
@@ -20,9 +20,11 @@ corrupt_data(
 
 \item{beta}{true linear relationship between response and predictors for CLEAN data (Inliers)}
 
-\item{O}{in 0,1: percentage of data to be corrupted \(O..Outliers\)}
+\item{O}{in 0,1: percentage of data to be corrupted (O..Outliers)}
 
 \item{OO}{worst range for Outliers}
+
+\item{eps_var}{variance of random errors}
 }
 \value{
 named list of class LM

@@ -37,7 +37,7 @@ admm<-function(X,y,rho,z,u){
 #' @export
 med_block <- function(X,y,K,b,b_prime, blocks=NULL){
 
-  blocks<-if (is.null(blocks)) sample(factor(rep(1:K, length.out=n))) else blocks
+  blocks<-if (is.null(blocks)) sample(factor(rep(1:K, length.out=nrow(X)))) else blocks
 
   # for each block we calculate mean loss
   means_loss<-sapply(1:K, function(B){
@@ -70,19 +70,22 @@ calculate_mom <- function(data, formula, beta, K, algorithm=c("GD", "ADMM"),
   )
 
   alg<-match.arg(algorithm)
-  X<-model.matrix(formula,data=data)
-  y<-data[,all.vars(formula)[1]]
+
+  mf<-model.frame(formula,data)
+  y<-mf[,1]
+  X<-model.matrix(formula, data)
   n<-nrow(X)
 
   if(!is.null(seed)) set.seed(seed)
   fix_blocks<-if(stochastic) NULL else sample(factor(rep(1:K, length.out=n)))
 
+
+  b<-b_prime<-u<-u_prime<-z<-z_prime<-numeric(ncol(X))
+  mom_obj<-mom_err<-numeric(maxiter)
+  scores<-numeric(n)
+
   # > Gradient Descent -----------------
   if(alg%in% "GD"){ # Gradient Descent
-
-    b<-b_prime<-numeric(ncol(X))
-    mom_obj<-mom_err<-numeric(maxiter)
-    scores<-numeric(n)
 
     iter<-0
     while(TRUE) {
@@ -106,22 +109,11 @@ calculate_mom <- function(data, formula, beta, K, algorithm=c("GD", "ADMM"),
 
       if(iter>=maxiter) break
     }
-
-    return(list(
-      b=b,
-      mom_obj=mom_obj,
-      mom_err=mom_err,
-      scores=scores/maxiter
-
-    ))
   }
 
   # > ADMM -----------------
   if(alg%in% "ADMM"){
 
-    b<-b_prime<-u<-u_prime<-z<-z_prime<-numeric(ncol(X))
-    mom_obj<-mom_err<-numeric(maxiter)
-    scores<-numeric(n)
     rho<-5 # same as in their paper?
     iter<-0
     while(TRUE) {
@@ -145,14 +137,23 @@ calculate_mom <- function(data, formula, beta, K, algorithm=c("GD", "ADMM"),
       if(iter>=maxiter) break
     }
 
-    return(list(
-      b=b,
-      mom_obj=mom_obj,
-      mom_err=mom_err,
-      scores=scores/maxiter
+}
 
-    ))
-  }
+  return(
+      structure(
+        list(
+          b=b,
+          mom_obj=mom_obj,
+          mom_err=mom_err,
+          scores=scores/maxiter,
+          maxiter=maxiter,
+          K=K,
+          n=n,
+          se=NULL
+        ),
+        class="MOM"
+      )
+    )
 
 }
 
@@ -167,14 +168,12 @@ calculate_mom <- function(data, formula, beta, K, algorithm=c("GD", "ADMM"),
 #' @param algorithm specifying how to get coefficients, GD (gradient-descent), ADMM(ascent-descent)
 #' @param stochastic TRUE/FALSE decides, if blocks should be shuffled randomly in every iteration (stochastic==TRUE)
 #'                   or based on a fixed starting partition (stochastic==FALSE)
-#' @param nboot for variance estimation: number of bootstrap iterations (with resampling blocks...stochastic==TRUE)
+#' @param nboot integer controlling how many times MOM-algorithm should be repeated on a resampled (with replacement) dataset.
 #' @param ... optional arguments like stepsize, maxiter, seed, ...
 #' @returns named list with final b (coefficients), iterative objectives and errors
 #' @examples
 #'   data<-uniLM::corrupt_data(n=100,scenario="a",O=0.1)
 #'   res<-MOM(data, K=12, algorithm="GD")
-#'   plot(0:100, res$mom_obj)
-#'   plot(0:100, res$mom_err)
 #'   abs(res$b-true_beta)
 #' @export
 MOM <- function(data, formula=NULL, beta=NULL, K, algorithm=c("GD", "ADMM"),
@@ -185,39 +184,13 @@ MOM <- function(data, formula=NULL, beta=NULL, K, algorithm=c("GD", "ADMM"),
 
 #' @rdname MOM
 #' @export
-MOM.default <- function(data, formula, beta, K, algorithm=c("GD", "ADMM"),
-                        stochastic=TRUE, nboot=0, ...){
+MOM.default <- function(data, formula, beta, ...){
 
-  # checks:
+  # try to convert as LM object and pass to LM method:
+  obj<-validate_LM(new_LM(list(data=data,formula=formula,beta=beta)))
 
-  invisible(validate_LM(new_LM(list(data=data,formula=formula,beta=beta))))
+  MOM(obj, ...)
 
-  # bootstrap logic:
-
-  boots<-list(); length(boots) <- nboot
-
-  if (nboot>0){
-    for (i in 1:nboot){
-      data_b<- data[sample(1:nrow(data),replace=TRUE) ,]
-      boots[[i]]<-calculate_mom(data=data_b, formula=formula, beta=beta, K=K,
-                                algorithm=algorithm, stochastic=stochastic, ...)
-    }
-
-
-    betas<-sapply(boots, function(x) x$b)
-    vcov_b <- cov(t(betas))
-    return(list(
-      betas=betas,
-      b=rowMeans(betas),
-      vcov = cov(t(betas)),
-      se=sqrt(diag(vcov_b)),
-      scores=rowMeans(sapply(boots,function(x)x$scores))
-    ))
-  } else{
-
-    calculate_mom(data=data, formula=formula, beta=beta, K=K,
-                  algorithm=algorithm, stochastic=stochastic, ...)
-  }
 }
 
 #' @rdname MOM
@@ -230,33 +203,54 @@ MOM.LM <- function(data, formula=NULL, beta=NULL, K, algorithm=c("GD", "ADMM"),
   if(!inherits(data, "LM")){
     stop("Data must be of class LM (eg 'uniLM::LM()',uniLM::corrupt_data()')")
   }
-  invisible(validate_LM(data))
-  check_1num(nboot, "num")
+  data<-validate_LM(data)
+  invisible(check_1num(nboot, "num"))
 
-  formula<- momOverwrite("formula")
-  beta<- momOverwrite("beta")
+  formula<- if(is.null(formula)) data$formula else warning("External formula object, other than the one stored in LM-object, will be used")
+  beta<- if(is.null(beta)){
+    data$beta
+    } else {
+      message("Beta in LM-object will now contain the minmax MOM-estimate, starting the algorithm at: ", beta)
+    }
+
   data<-data$data
 
-  # bootstrap logic:
+  # 'bootstrap-like' resampling, but but just reshuffle blocks on same dataset (effectively an empirical variance)
 
   boots<-list(); length(boots) <- nboot
 
   if (nboot>0){
+    message("Bootstrapping progress: \n")
     for (i in 1:nboot){
-      #data_b<- data[sample(1:nrow(data),replace=TRUE) ,]
-      boots[[i]]<-calculate_mom(data=data, formula=formula, beta=beta, K=K,
+      data_b<- data[sample(1:nrow(data),replace=TRUE) ,]
+      boots[[i]]<-calculate_mom(data=data_b, formula=formula, beta=beta, K=K,
                                 algorithm=algorithm, stochastic=stochastic, ...)
+
+      #if(i%%5 == 0){
+      cat("\r",round(i/nboot*100), "%", sep="") #\r always restarts on the same line
+      utils::flush.console()
+      #}
     }
 
     betas<-sapply(boots, function(x) x$b)
     vcov_b <- cov(t(betas))
-    return(list(
+
+    return(
+      structure(list(
       betas=betas,
       b=rowMeans(betas),
-      vcov = cov(t(betas)),
-      se=sqrt(diag(vcov_b)),
-      scores=rowMeans(sapply(boots,function(x)x$scores))
-    ))
+      vcov = vcov_b,
+      se = sqrt(diag(vcov_b)),
+      mom_err = rowMeans(sapply(boots,function(x)x$mom_err)),
+      mom_obj = rowMeans(sapply(boots,function(x)x$mom_obj)),
+      scores = rowMeans(sapply(boots,function(x)x$scores)),
+      K = boots[[1]]$K,
+      n = boots[[1]]$n,
+      maxiter = boots[[1]]$maxiter,
+      nboot=nboot
+    ),
+    class="MOM")
+    )
 
   } else{
     calculate_mom(data=data, formula=formula, beta=beta, K=K,
@@ -267,7 +261,83 @@ MOM.LM <- function(data, formula=NULL, beta=NULL, K, algorithm=c("GD", "ADMM"),
 
 
 
+# > plot MOM --------------------------------------
 
+#' plot results from MOM-algorithm, a.o. useful for outlier detection
+#'
+#' @param mom object containing results from MOM-algorithm
+#' @param plot TRUE draws plot, FALSE stores results (including outlier detection)
+#' @param which can specify plots to be drawn
+#' @returns plot output or named list with value
+#' @import ggplot2
+#' @export
+plot.MOM <- function(mom, plot=TRUE, which=1:4, ...){
+
+  algorithm_data <- data.frame(
+    iterations=1:mom$maxiter,
+    mom_err=mom$mom_err,
+    mom_obj=mom$mom_obj
+  )
+
+  outlier_data <-data.frame(
+    x=1:mom$n, scores=mom$scores
+    )
+
+  block_p <- (1/mom$K)*0.5
+
+
+  outlier_data$outlier <- factor(as.integer(outlier_data$scores<=block_p),
+                              levels=c(0,1), labels=c("Inlier", "Outlier")
+  )
+
+
+  if(plot){
+
+suppressMessages({suppressWarnings({
+    g1<- algorithm_data |>
+      ggplot(aes(iterations, mom_err))+
+      geom_line(color="Skyblue",lwd=1.5)+
+      labs(title="Error between estimate and true")
+
+    g2<- algorithm_data |>
+      ggplot(aes(iterations, mom_err))+
+      geom_line(color="Skyblue",lwd=1.5)+
+      labs(title="MOM-objective (distance between the two candidates)")
+
+    g3 <- outlier_data |>
+      ggplot(aes(x, scores)) +
+      geom_col() +
+      geom_hline(yintercept=block_p, color="red")+
+      geom_text(
+        aes(label=ifelse(outlier_data$scores<=block_p, as.character(x), "")),
+        vjust=-0.8,size=3.5,color="black"
+      ) +
+      ylim(c(0, max(block_p, outlier_data$scores)*1.2))+
+      labs(title="Outlier Detection via Median-Block-Frequency",
+           subtitle=paste0("outlier idx: ",paste(as.character(1:mom$n)[outlier_data$scores<=block_p],collapse=","))
+           )
+
+    g4 <- outlier_data |>
+      ggplot(aes(outlier,scores, fill=outlier)) +
+      geom_boxplot() +
+      geom_hline(yintercept=block_p, color = "red") +
+      labs(title = "Scores grouped by Outlier Status", x = "Status", y = "scores")
+
+    plots<-list(g1,g2,g3,g4)
+
+})})
+
+    for(i in which) print(plots[[i]])
+
+  }
+
+  return(
+    invisible(list(algorithm_data=algorithm_data,
+                   outlier_data = outlier_data))
+  )
+
+
+}
 
 
 
