@@ -67,13 +67,15 @@ return(x)
 # > 1c ------------------
 #' print method for class LM
 #
-#' @param x object of class LM \(contains true beta and formula\)
+#' @param x object of class LM (contains true beta and formula)
+#' @param ... additional arguments passed to print
 #' @returns something super duper amazing
+#' @import utils
 #' @export
 print.LM <- function(x, ...){
 
   cat("\nCall:", deparse(x$formula),"\n\nData:\n")
-  str(x$data)
+  utils::str(x$data)
   cat("\nbeta:\n")
   print(x$beta)
 
@@ -83,6 +85,7 @@ print.LM <- function(x, ...){
 #' print method for class LMfit
 #
 #' @param x object of class LM \(contains true beta and formula\)
+#' @param ... additional arguments passed to print
 #' @returns something super duper amazing
 #' @import stats
 #' @export
@@ -172,7 +175,7 @@ LM <- function(data, formula, beta=NULL,
       b=mod_lm$coeff,
       se=sqrt(diag(vcov(mod_lm)))
     ),
-   M_est = list(
+   MEST = list(
      b = mod_rlm$coefficients,
      se = sqrt(diag(vcov(mod_rlm)))
    ),
@@ -204,6 +207,7 @@ LM <- function(data, formula, beta=NULL,
 #' @param stochastic TRUE/FALSE decides, if blocks should be shuffled randomly in every iteration (stochastic==TRUE)
 #'                   or based on a fixed starting partition (stochastic==FALSE)
 #' @param maxiter number of iterations the MOM-algorithm should perform
+#' @param ... additional arguments passed to MOM-algorithm.
 #' @returns an integer K specifiyng the ideal number of blocks to partition present data-structure.
 #' @export
 adaptK <- function(data, formula=NULL, beta=NULL,
@@ -279,10 +283,6 @@ summary.LMfit <- function(data){
 #' @param data object of class LM \(contains true beta and formula\)
 #' @param type string specifying if response, standardized, or studentized residuals
 #' @returns vector of residuals
-#' @examples
-#'   data<-uniLM::corrupt_data(n=100,scenario="a",O=0.1)
-#'   r_t <- residuals(data,type="student")
-#'   head(r_t)
 #' @export
 residuals.LM <- function(data, type=c("response", "standard", "student")){
 
@@ -325,15 +325,10 @@ residuals.LM <- function(data, type=c("response", "standard", "student")){
 #' @param data object of class LM \(contains true beta and formula\)
 #' @param plot TRUE draws plot, FALSE stores diagnostic values
 #' @param which can specify plots to be drawn
+#' @param ... additional arguments passed to plot (at the moment not used)
 #' @returns plot output or named list with values
-#' @examples
-#'   data<-uniLM::corrupt_data(n=100, scenario="a",O=0.1)
-#'   plot(data,which=3)
-#'
-#'   plot_data<-plot(data,plot=FALSE)
-#'   head(plot_data$cook_d)
-#'
 #' @import ggplot2 stats
+#' @importFrom rlang .data
 #' @export
 plot.LM <- function(data, plot=TRUE, which=1:4, ...){
 
@@ -362,12 +357,12 @@ plot.LM <- function(data, plot=TRUE, which=1:4, ...){
 
     # Plot 1: fitted vs standardized studentized res
     g1<- data.frame(x=sqrt(abs(r_t)), y=yhat) |>
-      ggplot2::ggplot(ggplot2::aes(x, y))+
+      ggplot2::ggplot(ggplot2::aes(.data$x, .data$y))+
       ggplot2::geom_point(alpha=0.5) +
       ggplot2::geom_line(data=data.frame(
         x=sqrt(abs(r_t)),
         y=stats::lowess(sqrt(abs(r_t)), yhat)$y),
-        ggplot2::aes(x,y),color="Darkblue") +
+        ggplot2::aes(.data$x,.data$y),color="Darkblue") +
       ggplot2::labs(x="sqrt(abs(studentized residuals))",
            title="fitted~sqrt(abs(r_t))")+
       ggplot2::theme_minimal()
@@ -375,7 +370,7 @@ plot.LM <- function(data, plot=TRUE, which=1:4, ...){
 
     # Plot 2: studentized res vs. leverage
     g2 <- data.frame(x=diag(H), y=r_t) |>
-      ggplot2::ggplot(ggplot2::aes(x,y))+
+      ggplot2::ggplot(ggplot2::aes(.data$x,.data$y))+
       ggplot2::geom_point(alpha=0.5) +
       ggplot2::labs(title="Studentized residuals~leverage",
            x="diag(H)", y="r_t")+
@@ -384,11 +379,11 @@ plot.LM <- function(data, plot=TRUE, which=1:4, ...){
 
     # Plot 3: Cook plot (red line is treshhold for outlier)
     g3 <- data.frame(x=1:n, y=cook_d) |>
-      ggplot2::ggplot(ggplot2::aes(x,y))+
+      ggplot2::ggplot(ggplot2::aes(.data$x,.data$y))+
       ggplot2::geom_col() +
       ggplot2::geom_hline(yintercept=4/n, color="red") +
       ggplot2::geom_text(
-        ggplot2::aes(label=ifelse(y>4/n,as.character(x),"")),
+        ggplot2::aes(label=ifelse(.data$y>4/n,as.character(.data$x),"")),
         vjust=-0.8,size=3.5,color = "black"
       ) +
       ggplot2::ylim(c(0, max((4/n)*1.02,max(cook_d)*1.02)))+
@@ -406,7 +401,7 @@ plot.LM <- function(data, plot=TRUE, which=1:4, ...){
 
     # vielleicht kann man das noch besser zoomen
     g4 <- data.frame(x=qnorm((1:n)/n - 0.01), y=sort(ehat)) |>
-      ggplot2::ggplot(ggplot2::aes(x,y)) +
+      ggplot2::ggplot(ggplot2::aes(.data$x,.data$y)) +
       ggplot2::geom_point(alpha=0.5)+
       ggplot2::geom_abline(ggplot2::aes(intercept=b,slope=a),color="Darkblue")+#color="robust"))+
       #ggplot2::geom_abline(ggplot2::aes(intercept=mean(ehat),slope=sd(ehat),color="naive"))+
@@ -435,13 +430,13 @@ plot.LM <- function(data, plot=TRUE, which=1:4, ...){
 }
 
 # > 5 ------------------
-#' @export
-confint.LMfit <- function(object, parm = "", level = 0.95,
-                           test=c("", ""),...){
-
-
-      test <- match.arg(test)
-}
+## @export
+# confint.LMfit <- function(object, parm = "", level = 0.95,
+#                            test=c("", ""),...){
+#
+#
+#       test <- match.arg(test)
+# }
 
 # > 6 -------------------------------
 

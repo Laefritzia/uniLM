@@ -24,15 +24,6 @@ admm<-function(X,y,rho,z,u){
 #' @param b coefficient candidate
 #' @param b_prime another coefficient candidate
 #' @param blocks supply block-partition of the data (eg fixed blocks or reshuffled each iteration)
-#' @examples
-#'  data<-uniLM::corrupt_data(n=100,scenario="a",O=0.1)
-#'  X<-model.matrix(data$formula,data=data$data)
-#   y<-data$data[,all.vars(data$formula)[1]])
-#
-#'  med_block(X=X,y=y,K=20,
-#'  b=rep(0,length(data$beta)),
-#'  b_prime=data$beta
-#'  )
 #' @returns named list with X and y of median block
 #' @export
 med_block <- function(X,y,K,b,b_prime, blocks=NULL){
@@ -149,7 +140,7 @@ calculate_mom <- function(data, formula, beta, K, algorithm=c("GD", "ADMM"),
           maxiter=maxiter,
           K=K,
           n=n,
-          se=NULL
+          se=rep(NA_real_, ncol(X))
         ),
         class="MOM"
       )
@@ -171,10 +162,6 @@ calculate_mom <- function(data, formula, beta, K, algorithm=c("GD", "ADMM"),
 #' @param nboot integer controlling how many times MOM-algorithm should be repeated on a resampled (with replacement) dataset.
 #' @param ... optional arguments like stepsize, maxiter, seed, ...
 #' @returns named list with final b (coefficients), iterative objectives and errors
-#' @examples
-#'   data<-uniLM::corrupt_data(n=100,scenario="a",O=0.1)
-#'   res<-MOM(data, K=12, algorithm="GD")
-#'   abs(res$b-true_beta)
 #' @export
 MOM <- function(data, formula=NULL, beta=NULL, K, algorithm=c("GD", "ADMM"),
                 stochastic=TRUE, nboot=0,...){
@@ -268,8 +255,10 @@ MOM.LM <- function(data, formula=NULL, beta=NULL, K, algorithm=c("GD", "ADMM"),
 #' @param mom object containing results from MOM-algorithm
 #' @param plot TRUE draws plot, FALSE stores results (including outlier detection)
 #' @param which can specify plots to be drawn
+#' @param ... additional arguments passed to plot (currently not used)
 #' @returns plot output or named list with value
-#' @import ggplot2::ggplot2
+#' @importFrom rlang .data
+#' @import ggplot2
 #' @export
 plot.MOM <- function(mom, plot=TRUE, which=1:4, ...){
 
@@ -300,21 +289,21 @@ plot.MOM <- function(mom, plot=TRUE, which=1:4, ...){
 
 suppressMessages({suppressWarnings({
     g1<- algorithm_data |>
-      ggplot2::ggplot(ggplot2::aes(iterations, mom_err))+
+      ggplot2::ggplot(ggplot2::aes(.data$iterations, .data$mom_err))+
       ggplot2::geom_line(color="Skyblue",lwd=1.5)+
       ggplot2::labs(title="Error between estimate and true")+
       ggplot2::theme_minimal()
 
     g2<- algorithm_data |>
-      ggplot2::ggplot(ggplot2::aes(iterations, mom_obj))+
+      ggplot2::ggplot(ggplot2::aes(.data$iterations, .data$mom_obj))+
       ggplot2::geom_line(color="Skyblue",lwd=1.5)+
       ggplot2::labs(title="MOM-objective (distance between the two candidates)")+
       ggplot2::theme_minimal()
 
     g3 <- outlier_data |>
-      ggplot2::ggplot(ggplot2::aes(x, scores, fill=scores<=block_p)) +
+      ggplot2::ggplot(ggplot2::aes(.data$x, .data$scores, fill=.data$scores<=block_p)) +
       ggplot2::geom_col() +
-      ggplot2::geom_point(ggplot2::aes(color=scores<=block_p))+
+      ggplot2::geom_point(ggplot2::aes(color=.data$scores<=block_p))+
       ggplot2::geom_hline(yintercept=block_p, color="red")+
       ggplot2::scale_fill_manual(values=c(
         "TRUE"="#be0032",
@@ -325,18 +314,18 @@ suppressMessages({suppressWarnings({
         "FALSE"="#007bb8"
       ))+
       ggplot2::geom_text(
-        ggplot2::aes(label=ifelse(.data$scores<=block_p, as.character(x), "")),
+        ggplot2::aes(label=ifelse(.data$scores<=block_p, as.character(.data$x), "")),
         vjust=-0.8,size=3.5,color="black"
       ) +
       ggplot2::ylim(c(0, ylimit))+
       ggplot2::labs(title="Outlier Detection via Median-Block-Frequency",
-           subtitle=paste0("outlier idx: ",paste(as.character(1:mom$n)[outlier_data$scores<=block_p],collapse=","))
+           subtitle=paste0("outlier idx: ",paste(as.character(1:mom$n)[.data$scores<=block_p],collapse=","))
            )+
        ggplot2::theme_minimal()+
       ggplot2::theme(legend.position = "bottom")
 
     g4 <- outlier_data |>
-      ggplot2::ggplot(ggplot2::aes(outlier,scores, fill=outlier)) +
+      ggplot2::ggplot(ggplot2::aes(.data$outlier,.data$scores, fill=.data$outlier)) +
       ggplot2::geom_boxplot() +
       #ggplot2::geom_hline(yintercept=block_p, color = "red") +
       ggplot2::labs(title = "Scores grouped by Outlier Status",

@@ -45,6 +45,8 @@ adaptK(
 
 \item{stochastic}{TRUE/FALSE decides, if blocks should be shuffled randomly in every iteration (stochastic==TRUE)
 or based on a fixed starting partition (stochastic==FALSE)}
+
+\item{...}{additional arguments passed to MOM-algorithm.}
 }
 \value{
 an integer K specifiyng the ideal number of blocks to partition present data-structure.

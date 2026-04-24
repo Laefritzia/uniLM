@@ -25,11 +25,3 @@ named list with X and y of median block
 \description{
 chooses block based on MOM: median of means
 }
-\examples{
- data<-uniLM::corrupt_data(n=100,scenario="a",O=0.1)
- X<-model.matrix(data$formula,data=data$data)
- med_block(X=X,y=y,K=20,
- b=rep(0,length(data$beta)),
- b_prime=data$beta
- )
-}

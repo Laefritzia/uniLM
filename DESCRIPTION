@@ -1,18 +1,24 @@
 Package: uniLM
 Title: Unified Framework Robust Linear Models
-Version: 0.0.0.9000
+Version: 0.1.0
 Authors@R: 
     c(
     person("Laetitia", "Fritz", , "leablahout@gmail.com", role = c("aut", "cre")),
-    person("Sarah", "Dvorak", , "sarah@dvoraks.at", role = c("aut", "cre"))
+    person("Sarah", "Dvorak", , "sarah@dvoraks.at", role = c("aut"))
     )
-Description: robust estimation with MOM, generate corrupt data, diagnostics
-License: GPLv3
+Description: Unified framework for robust linear regression centered around the minmax 
+             Median-of-Neans method proposed by Lecué and Lerasle (2020), to provide both 
+             a robust point estimate with bootstrapped variance, as well as an 
+             outlier-detection diagnostic tool.
+License: GPL-3
 Encoding: UTF-8
+Depends:
+    R (>= 4.1.0)
 Imports: 
     stats,
     MASS,
-    ggplot2
+    ggplot2,
+    rlang
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
 

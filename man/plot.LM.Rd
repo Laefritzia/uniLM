@@ -12,18 +12,12 @@
 \item{plot}{TRUE draws plot, FALSE stores diagnostic values}
 
 \item{which}{can specify plots to be drawn}
+
+\item{...}{additional arguments passed to plot (at the moment not used)}
 }
 \value{
 plot output or named list with values
 }
 \description{
 diagnostic plots for class LM
-}
-\examples{
-  data<-uniLM::corrupt_data(n=100, scenario="a",O=0.1)
-  plot(data,which=3)
-
-  plot_data<-plot(data,plot=FALSE)
-  head(plot_data$cook_d)
-
 }

@@ -54,8 +54,3 @@ named list with final b (coefficients), iterative objectives and errors
 \description{
 robust MOM-estimator for linear regression
 }
-\examples{
-  data<-uniLM::corrupt_data(n=100,scenario="a",O=0.1)
-  res<-MOM(data, K=12, algorithm="GD")
-  abs(res$b-true_beta)
-}

@@ -12,6 +12,8 @@
 \item{plot}{TRUE draws plot, FALSE stores results (including outlier detection)}
 
 \item{which}{can specify plots to be drawn}
+
+\item{...}{additional arguments passed to plot (currently not used)}
 }
 \value{
 plot output or named list with value

@@ -19,6 +19,8 @@ remotes::install_github("Laefritzia/uniLM")
 
 # To-Do
 
+#.) ein kleines case exampel anleitung vignette fuers package
+
 # .) MOM: plot method for res, outlier detection diagnostic
 # .) links in die .rd pages zu den papern geben
 

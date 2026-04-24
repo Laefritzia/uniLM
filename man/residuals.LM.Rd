@@ -17,8 +17,3 @@ vector of residuals
 \description{
 residuals method for class LM
 }
-\examples{
-  data<-uniLM::corrupt_data(n=100,scenario="a",O=0.1)
-  r_t <- residuals(data,type="student")
-  head(r_t)
-}

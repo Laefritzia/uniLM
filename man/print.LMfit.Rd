@@ -8,6 +8,8 @@
 }
 \arguments{
 \item{x}{object of class LM \(contains true beta and formula\)}
+
+\item{...}{additional arguments passed to print}
 }
 \value{
 something super duper amazing
