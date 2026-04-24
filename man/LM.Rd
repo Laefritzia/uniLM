@@ -9,6 +9,7 @@ LM(
   formula,
   beta = NULL,
   MOMalgorithm = c("GD", "ADMM"),
+  K = NULL,
   stochastic = TRUE,
   nboot = 100,
   ...
@@ -23,9 +24,11 @@ LM(
 
 \item{MOMalgorithm}{specifies algorithm to find minimax mom-estimator}
 
+\item{K}{integer specifying number of blocks for MOM-algorithm. If NULL, then a grid search for optimal K will be run, see '?uniLM::adaptK'.}
+
 \item{stochastic}{logical, controls if blocks in MOM-algorithm should be reshuffled each iteration}
 
-\item{nboot}{integer controlling how many times MOM-algorithm should be repeated on a resampled (with replacement) dataset.}
+\item{nboot}{integer controlling how many times bootstrapped variance should should resample}
 
 \item{...}{additional arguments passed to MOM-algorithm, see ?MOM for details.}
 }

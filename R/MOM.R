@@ -204,6 +204,10 @@ MOM.LM <- function(data, formula=NULL, beta=NULL, K, algorithm=c("GD", "ADMM"),
 
   data<-data$data
 
+
+  RES<-calculate_mom(data=data, formula=formula, beta=beta, K=K,
+                     algorithm=algorithm, stochastic=stochastic, ...)
+
   # 'bootstrap-like' resampling, but but just reshuffle blocks on same dataset (effectively an empirical variance)
 
   boots<-list(); length(boots) <- nboot
@@ -237,24 +241,26 @@ MOM.LM <- function(data, formula=NULL, beta=NULL, K, algorithm=c("GD", "ADMM"),
 
     return(
       structure(list(
+      b = RES$b,
+      mom_obj=RES$mom_obj,
+      mom_err=RES$mom_err,
+      scores=RES$scores/RES$maxiter,
+      maxiter=RES$maxiter,
+      K=RES$K,
+      n=RES$n,
       betas=betas,
-      b=rowMeans(betas),
+      boot_b=rowMeans(betas),
       vcov = vcov_b,
       se = sqrt(diag(vcov_b)),
-      mom_err = rowMeans(sapply(boots,function(x)x$mom_err)),
-      mom_obj = rowMeans(sapply(boots,function(x)x$mom_obj)),
-      scores = rowMeans(sapply(boots,function(x)x$scores)),
-      K = boots[[1]]$K,
-      n = boots[[1]]$n,
-      maxiter = boots[[1]]$maxiter,
       nboot=nboot
     ),
     class="MOM")
     )
 
   } else{
-    calculate_mom(data=data, formula=formula, beta=beta, K=K,
-                  algorithm=algorithm, stochastic=stochastic, ...)
+
+    RES
+
   }
 
 }
@@ -274,9 +280,6 @@ MOM.LM <- function(data, formula=NULL, beta=NULL, K, algorithm=c("GD", "ADMM"),
 #' @import ggplot2
 #' @export
 plot.MOM <- function(mom, plot=TRUE, which=1:4, ...){
-
-
-  #message("Outlier detection works best without bootstrapping (nboot=0)")
 
   algorithm_data <- data.frame(
     iterations=1:mom$maxiter,

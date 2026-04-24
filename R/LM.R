@@ -92,7 +92,7 @@ print.LM <- function(x, ...){
 print.LMfit <- function(x, ...){
 
   nboot<-attributes(x)$nboot
-  if(nboot > 0)cat("\nResults for bootstrapped variance and point estimator with", nboot, "runs.\n")
+  if(nboot > 0)cat("\nResults with bootstrapped variance from", nboot, "runs.\n")
 
   cat("\nCall: ", deparse(x$formula),"\n\nminmax MOM-result:\n\n")
 
@@ -120,14 +120,16 @@ print.LMfit <- function(x, ...){
 #' @param formula formula for linear model
 #' @param beta for simulation purposes: true linear relationship between response and predictors
 #' @param MOMalgorithm specifies algorithm to find minimax mom-estimator
+#' @param K integer specifying number of blocks for MOM-algorithm. If NULL, then a grid search for optimal K will be run, see '?uniLM::adaptK'.
 #' @param stochastic logical, controls if blocks in MOM-algorithm should be reshuffled each iteration
-#' @param nboot integer controlling how many times MOM-algorithm should be repeated on a resampled (with replacement) dataset.
+#' @param nboot integer controlling how many times bootstrapped variance should should resample
 #' @param ... additional arguments passed to MOM-algorithm, see ?MOM for details.
 #' @returns named list of class LM
 #' @import stats MASS
 #' @export
 LM <- function(data, formula, beta=NULL,
                MOMalgorithm=c("GD", "ADMM"),
+               K=NULL,
                stochastic=TRUE,
                nboot=100,...){
 
@@ -158,7 +160,7 @@ LM <- function(data, formula, beta=NULL,
   # bLM$formula <- mod
 
   # choose best block-size for MOM
-  K<-adaptK(bLM, algorithm=alg,stochastic=stochastic)
+  K<-if(is.null(K)) adaptK(bLM, algorithm=alg,stochastic=stochastic) else K
 
   # minimax mom method
   mod_MOM<-MOM(bLM, K=K, algorithm=alg, stochastic=stochastic, nboot=nboot,...)
@@ -260,22 +262,22 @@ adaptK.LM <- function(data, formula=NULL, beta=NULL,
 
 
 # > 2.3 ------------------
-#' summary method for class LM
-#'
-#' @param data object of class LM (contains true beta and formula)
-#' @returns something super duper amazing
-#' @export
-summary.LMfit <- function(data){
-
-  # Checks:
-  if(!inherits(data, "LMfit")){
-    stop("Data must be of class LMfit (call 'uniLM::LM()'")
-  }
-  data<-validate_LM(data)
-
-  # hier z und p rein?
-
-}
+## summary method for class LM
+##
+## @param data object of class LM (contains true beta and formula)
+## @returns something super duper amazing
+## @export
+# summary.LMfit <- function(data){
+#
+#   # Checks:
+#   if(!inherits(data, "LMfit")){
+#     stop("Data must be of class LMfit (call 'uniLM::LM()'")
+#   }
+#   data<-validate_LM(data)
+#
+#   # hier z und p rein?
+#
+# }
 
 # > 3 ------------------
 #' residuals method for class LM
