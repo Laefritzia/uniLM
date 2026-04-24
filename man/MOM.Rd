@@ -14,6 +14,7 @@ MOM(
   algorithm = c("GD", "ADMM"),
   stochastic = TRUE,
   nboot = 0,
+  parallel = FALSE,
   ...
 )
 
@@ -27,6 +28,7 @@ MOM(
   algorithm = c("GD", "ADMM"),
   stochastic = TRUE,
   nboot = 0,
+  parallel = FALSE,
   ...
 )
 }
@@ -45,6 +47,8 @@ MOM(
 or based on a fixed starting partition (stochastic==FALSE)}
 
 \item{nboot}{integer controlling how many times MOM-algorithm should be repeated on a resampled (with replacement) dataset.}
+
+\item{parallel}{TRUE/FALSE decides, if the bootstrapping (nboot>0) should be parallelized. Only use this if you know how to plan sequential vs. multisession}
 
 \item{...}{optional arguments like stepsize, maxiter, seed, ...}
 }

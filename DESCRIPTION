@@ -1,6 +1,6 @@
 Package: uniLM
 Title: Unified Framework Robust Linear Models
-Version: 0.1.0
+Version: 0.1.1
 Authors@R: 
     c(
     person("Laetitia", "Fritz", , "leablahout@gmail.com", role = c("aut", "cre")),
@@ -18,7 +18,11 @@ Imports:
     stats,
     MASS,
     ggplot2,
-    rlang
+    rlang,
+    utils,
+    future.apply
+Suggests:
+    future
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
 

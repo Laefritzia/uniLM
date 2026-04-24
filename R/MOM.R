@@ -160,11 +160,13 @@ calculate_mom <- function(data, formula, beta, K, algorithm=c("GD", "ADMM"),
 #' @param stochastic TRUE/FALSE decides, if blocks should be shuffled randomly in every iteration (stochastic==TRUE)
 #'                   or based on a fixed starting partition (stochastic==FALSE)
 #' @param nboot integer controlling how many times MOM-algorithm should be repeated on a resampled (with replacement) dataset.
+#' @param parallel TRUE/FALSE decides, if the bootstrapping (nboot>0) should be parallelized. Only use this if you know how to plan sequential vs. multisession
 #' @param ... optional arguments like stepsize, maxiter, seed, ...
 #' @returns named list with final b (coefficients), iterative objectives and errors
+#' @import utils future.apply
 #' @export
 MOM <- function(data, formula=NULL, beta=NULL, K, algorithm=c("GD", "ADMM"),
-                stochastic=TRUE, nboot=0,...){
+                stochastic=TRUE, nboot=0, parallel=FALSE,...){
   UseMethod("MOM")
 }
 
@@ -183,7 +185,7 @@ MOM.default <- function(data, formula, beta, ...){
 #' @rdname MOM
 #' @export
 MOM.LM <- function(data, formula=NULL, beta=NULL, K, algorithm=c("GD", "ADMM"),
-                   stochastic=TRUE, nboot=0,...){
+                   stochastic=TRUE, nboot=0, parallel=FALSE,...){
 
   # checks and structure:
 
@@ -207,7 +209,11 @@ MOM.LM <- function(data, formula=NULL, beta=NULL, K, algorithm=c("GD", "ADMM"),
   boots<-list(); length(boots) <- nboot
 
   if (nboot>0){
-    message("Bootstrapping progress: \n")
+
+    # only give the pretty message, when not parallelizing
+    if (!parallel){
+      message("Bootstrapping progress: \n")
+
     for (i in 1:nboot){
       data_b<- data[sample(1:nrow(data),replace=TRUE) ,]
       boots[[i]]<-calculate_mom(data=data_b, formula=formula, beta=beta, K=K,
@@ -217,6 +223,13 @@ MOM.LM <- function(data, formula=NULL, beta=NULL, K, algorithm=c("GD", "ADMM"),
       cat("\r",round(i/nboot*100), "%", sep="") #\r always restarts on the same line
       utils::flush.console()
       #}
+    } } else {
+      data_b<- data[sample(1:nrow(data),replace=TRUE) ,]
+      boots<-future.apply::future_lapply(1:nboot, function(x){
+        calculate_mom(data=data_b, formula=formula, beta=beta, K=K,
+                      algorithm=algorithm, stochastic=stochastic, ...)
+      }, future.seed=TRUE)
+
     }
 
     betas<-sapply(boots, function(x) x$b)
