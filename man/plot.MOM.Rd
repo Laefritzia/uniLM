@@ -4,7 +4,7 @@
 \alias{plot.MOM}
 \title{plot results from MOM-algorithm, a.o. useful for outlier detection}
 \usage{
-\method{plot}{MOM}(mom, plot = TRUE, which = 1:4, ...)
+\method{plot}{MOM}(mom, plot = TRUE, which = 1:4, block_p = 0.001, ...)
 }
 \arguments{
 \item{mom}{object containing results from MOM-algorithm}
@@ -12,6 +12,8 @@
 \item{plot}{TRUE draws plot, FALSE stores results (including outlier detection)}
 
 \item{which}{can specify plots to be drawn}
+
+\item{block_p}{upper bound for scores, everything below is classified as outlier}
 
 \item{...}{additional arguments passed to plot (currently not used)}
 }

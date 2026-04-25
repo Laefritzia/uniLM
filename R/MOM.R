@@ -278,12 +278,13 @@ MOM.LM <- function(data, formula=NULL, beta=NULL, K, algorithm=c("GD", "ADMM"),
 #' @param mom object containing results from MOM-algorithm
 #' @param plot TRUE draws plot, FALSE stores results (including outlier detection)
 #' @param which can specify plots to be drawn
+#' @param block_p upper bound for scores, everything below is classified as outlier
 #' @param ... additional arguments passed to plot (currently not used)
 #' @returns plot output or named list with value
 #' @importFrom rlang .data
 #' @import ggplot2
 #' @export
-plot.MOM <- function(mom, plot=TRUE, which=1:4, ...){
+plot.MOM <- function(mom, plot=TRUE, which=1:4, block_p=0.001, ...){
 
   algorithm_data <- data.frame(
     iterations=1:mom$maxiter,
@@ -295,7 +296,8 @@ plot.MOM <- function(mom, plot=TRUE, which=1:4, ...){
     x=1:mom$n, scores=mom$scores
     )
 
-  block_p <- (1/mom$K) - sqrt((1-1/mom$K)*(1/mom$K)/mom$n) #minus expected SE (variance of a frequncy: binomial)
+  #block_p <- 0.001
+  #(1/mom$K) - sqrt((1-1/mom$K)*(1/mom$K)/mom$n) #minus expected SE (variance of a frequncy: binomial)
 
 
   outlier_data$outlier <- factor(as.integer(outlier_data$scores<=block_p),
@@ -339,7 +341,7 @@ suppressMessages({suppressWarnings({
       ) +
       ggplot2::ylim(c(0, ylimit))+
       ggplot2::labs(title="Outlier Detection via Median-Block-Frequency",
-           subtitle=paste0("outlier idx: ",paste(as.character(1:mom$n)[.data$scores<=block_p],collapse=","))
+           subtitle=paste0("outlier idx: ",paste(as.character(1:mom$n)[outlier_data$scores<=block_p],collapse=","))
            )+
        ggplot2::theme_minimal()+
       ggplot2::theme(legend.position = "bottom")

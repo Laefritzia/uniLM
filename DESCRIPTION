@@ -1,6 +1,6 @@
 Package: uniLM
 Title: Unified Framework Robust Linear Models
-Version: 0.1.1
+Version: 0.1.2
 Authors@R: 
     c(
     person("Laetitia", "Fritz", , "leablahout@gmail.com", role = c("aut", "cre")),
