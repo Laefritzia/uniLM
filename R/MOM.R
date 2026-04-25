@@ -39,7 +39,9 @@ med_block <- function(X,y,K,b,b_prime, blocks=NULL){
   })
 
   # choose block which is closest to median
-  med_ind<-which.min(abs(stats::median(means_loss)-means_loss))[1]
+  med_ind<-which.min(abs(stats::median(means_loss, na.rm=TRUE)-means_loss))
+
+  if(is.na(med_ind)||length(med_in)==0) med_ind <- 1
 
   return(list(
     X=X[blocks %in%med_ind,,drop=FALSE],
@@ -237,7 +239,8 @@ MOM.LM <- function(data, formula=NULL, beta=NULL, K, algorithm=c("GD", "ADMM"),
     }
 
     betas<-sapply(boots, function(x) x$b)
-    vcov_b <- cov(t(betas))
+    beta_ok <- colSums(is.finite(betas))==nrow(betas) # one row in beta is one coeff
+    vcov_b <- cov(t(betas[,beta_ok,drop=FALSE]))
 
     return(
       structure(list(
@@ -252,7 +255,8 @@ MOM.LM <- function(data, formula=NULL, beta=NULL, K, algorithm=c("GD", "ADMM"),
       boot_b=rowMeans(betas),
       vcov = vcov_b,
       se = sqrt(diag(vcov_b)),
-      nboot=nboot
+      nboot=nboot,
+      nboot_conv = sum(beta_ok)
     ),
     class="MOM")
     )
