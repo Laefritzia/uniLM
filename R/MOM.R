@@ -41,7 +41,7 @@ med_block <- function(X,y,K,b,b_prime, blocks=NULL){
   # choose block which is closest to median
   med_ind<-which.min(abs(stats::median(means_loss, na.rm=TRUE)-means_loss))
 
-  if(is.na(med_ind)||length(med_in)==0) med_ind <- 1
+  if(is.na(med_ind)||length(med_ind)==0) med_ind <- 1
 
   return(list(
     X=X[blocks %in%med_ind,,drop=FALSE],
