@@ -228,8 +228,8 @@ MOM.LM <- function(data, formula=NULL, beta=NULL, K, algorithm=c("GD", "ADMM"),
       utils::flush.console()
       #}
     } } else {
-      data_b<- data[sample(1:nrow(data),replace=TRUE) ,]
       boots<-future.apply::future_lapply(1:nboot, function(x){
+        data_b<- data[sample(1:nrow(data),replace=TRUE) ,]
         calculate_mom(data=data_b, formula=formula, beta=beta, K=K,
                       algorithm=algorithm, stochastic=stochastic, ...)
       }, future.seed=TRUE)
