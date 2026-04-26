@@ -41,6 +41,7 @@ med_block <- function(X,y,K,b,b_prime, blocks=NULL){
   # choose block which is closest to median
   med_ind<-which.min(abs(stats::median(means_loss, na.rm=TRUE)-means_loss))
 
+  # fallback for non convergence
   if(is.na(med_ind)||length(med_ind)==0) med_ind <- 1
 
   return(list(
@@ -85,13 +86,14 @@ calculate_mom <- function(data, formula, beta, K, algorithm=c("GD", "ADMM"),
       iter<-iter+1
 
       blocks<- if(stochastic) sample(factor(rep(1:K, length.out=n))) else fix_blocks
-
       # medium worst block:(maximization)
       block<- med_block(X,y,K,b,b_prime, blocks=blocks)
       scores[blocks==block$med_ind] <- scores[blocks==block$med_ind]+1
       # gradient descent:(minimization)
       b    <- b - (stepsize)*gdesc(block$X, block$y, b)#/sqrt(iter)
       # same with new b for b_prime
+
+      #blocks<- if(stochastic) sample(factor(rep(1:K, length.out=n))) else fix_blocks
       block<- med_block(X,y,K,b,b_prime, blocks=blocks)
       scores[blocks==block$med_ind] <- scores[blocks==block$med_ind]+1
       b_prime<- b_prime - (stepsize)*gdesc(block$X, block$y, b_prime)#/sqrt(iter)
@@ -111,13 +113,16 @@ calculate_mom <- function(data, formula, beta, K, algorithm=c("GD", "ADMM"),
     iter<-0
     while(TRUE) {
       iter<-iter+1
-      blocks<- if(stochastic) sample(factor(rep(1:K, length.out=n))) else fix_blocks
+
       # DESCENT
+
+      blocks<- if(stochastic) sample(factor(rep(1:K, length.out=n))) else fix_blocks
       block<-  med_block(X,y,K,b,b_prime,blocks=blocks)
       scores[blocks==block$med_ind] <- scores[blocks==block$med_ind]+1
       admmD <- admm(block$X, block$y, rho,z,u)
       b<-admmD$b; z<- admmD$z; u<- admmD$u
       # ASCENT
+      #blocks<- if(stochastic) sample(factor(rep(1:K, length.out=n))) else fix_blocks
       block<- med_block(X,y,K,b,b_prime,blocks=blocks)
       scores[blocks==block$med_ind] <- scores[blocks==block$med_ind]+1
       admmA <- admm(block$X, block$y,rho,z_prime,u_prime)
@@ -148,6 +153,7 @@ calculate_mom <- function(data, formula, beta, K, algorithm=c("GD", "ADMM"),
       )
     )
 
+# maybe we should break when converged before maxiter
 }
 
 # > MOM ----------------
@@ -210,7 +216,7 @@ MOM.LM <- function(data, formula=NULL, beta=NULL, K, algorithm=c("GD", "ADMM"),
   RES<-calculate_mom(data=data, formula=formula, beta=beta, K=K,
                      algorithm=algorithm, stochastic=stochastic, ...)
 
-  # 'bootstrap-like' resampling, but but just reshuffle blocks on same dataset (effectively an empirical variance)
+  # bootstrap - parallel logic
 
   boots<-list(); length(boots) <- nboot
 
@@ -276,7 +282,7 @@ MOM.LM <- function(data, formula=NULL, beta=NULL, K, algorithm=c("GD", "ADMM"),
 #' plot results from MOM-algorithm, a.o. useful for outlier detection
 #'
 #' @param mom object containing results from MOM-algorithm
-#' @param plot TRUE draws plot, FALSE stores results (including outlier detection)
+#' @param plot TRUE draws plot, FALSE stores results
 #' @param which can specify plots to be drawn
 #' @param block_p upper bound for scores, everything below is classified as outlier
 #' @param ... additional arguments passed to plot (currently not used)
@@ -319,7 +325,7 @@ suppressMessages({suppressWarnings({
     g2<- algorithm_data |>
       ggplot2::ggplot(ggplot2::aes(.data$iterations, .data$mom_obj))+
       ggplot2::geom_line(color="Skyblue",lwd=1.5)+
-      ggplot2::labs(title="MOM-objective (distance between the two candidates)")+
+      ggplot2::labs(title="MOM-objective (distance between candidates)")+
       ggplot2::theme_minimal()
 
     g3 <- outlier_data |>
@@ -340,7 +346,8 @@ suppressMessages({suppressWarnings({
         vjust=-0.8,size=3.5,color="black"
       ) +
       ggplot2::ylim(c(0, ylimit))+
-      ggplot2::labs(title="Outlier Detection via Median-Block-Frequency",
+      ggplot2::labs(title="Outlier Detection via Median-Block-Frequency", x="x (index)",
+                    fill=paste0("scores<=",block_p),color=paste0("scores<=",block_p),
            subtitle=paste0("outlier idx: ",paste(as.character(1:mom$n)[outlier_data$scores<=block_p],collapse=","))
            )+
        ggplot2::theme_minimal()+

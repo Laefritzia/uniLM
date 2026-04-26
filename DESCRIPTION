@@ -1,13 +1,13 @@
 Package: uniLM
 Title: Unified Framework Robust Linear Models
-Version: 0.1.2
+Version: 0.1.3
 Authors@R: 
     c(
     person("Laetitia", "Fritz", , "leablahout@gmail.com", role = c("aut", "cre")),
     person("Sarah", "Dvorak", , "sarah@dvoraks.at", role = c("aut"))
     )
 Description: Unified framework for robust linear regression centered around the minmax 
-             Median-of-Neans method proposed by Lecué and Lerasle (2020), to provide both 
+             Median-of-Means method proposed by Lecué and Lerasle (2020), to provide both 
              a robust point estimate with bootstrapped variance, as well as an 
              outlier-detection diagnostic tool.
 License: GPL-3

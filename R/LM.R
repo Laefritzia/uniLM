@@ -8,7 +8,7 @@ new_LM <- function(res){
 
 # > 1b ------------------
 # for internal checks as well as converting formula and factor
-validate_LM <- function(x){
+validate_LM <- function(x, betaNULL=FALSE){
 
   if(sum(names(x)%in%c("data","beta", "formula"))!=3){
     stop("Named list with at least data, beta, and formula must be supplied,\n
@@ -55,11 +55,13 @@ validate_LM <- function(x){
     stop("Beta must be NULL or a numeric vector")
   }
 
-
+# skip this check in the first LM-step if user does not provide beta
+if(!betaNULL){
 frml_len <- ncol(model.matrix(x$formula, x$data[1,,drop=FALSE]))
  if(length(x$beta) != frml_len){
    stop("Regression formula doesnt match length of true beta.\nCheck if beta and formula match with your intercept logic and drop if not needed.")
  }
+}
 
 return(x)
 }
@@ -123,6 +125,7 @@ print.LMfit <- function(x, ...){
 #' @param K integer specifying number of blocks for MOM-algorithm. If NULL, then a grid search for optimal K will be run, see '?uniLM::adaptK'.
 #' @param stochastic logical, controls if blocks in MOM-algorithm should be reshuffled each iteration
 #' @param nboot integer controlling how many times bootstrapped variance should should resample
+#' @param parallel TRUE/FALSE decides, if the bootstrapping (nboot>0) should be parallelized. Only use this if you know how to plan sequential vs. multisession
 #' @param ... additional arguments passed to MOM-algorithm, see ?MOM for details.
 #' @returns named list of class LM
 #' @import stats MASS
@@ -131,18 +134,20 @@ LM <- function(data, formula, beta=NULL,
                MOMalgorithm=c("GD", "ADMM"),
                K=NULL,
                stochastic=TRUE,
-               nboot=100,...){
+               nboot=0,
+               parallel=FALSE,
+               ...){
 
   # bare LM
   bLM<-if(!inherits(data, "LM")){
-    validate_LM(new_LM(list(data=data,formula=formula,beta=beta)))
+    validate_LM(new_LM(list(data=data,formula=formula,beta=beta)),betaNULL=is.null(beta))
   } else {
     validate_LM(data)
   }
 
   X <- model.matrix(bLM$formula, bLM$data[1,,drop=FALSE])
 
-  if(is.null(data$beta)){
+  if(is.null(beta)){
     data$beta<-rep(0, ncol(X))
   }
 
@@ -163,7 +168,7 @@ LM <- function(data, formula, beta=NULL,
   K<-if(is.null(K)) adaptK(bLM, algorithm=alg,stochastic=stochastic) else K
 
   # minimax mom method
-  mod_MOM<-MOM(bLM, K=K, algorithm=alg, stochastic=stochastic, nboot=nboot,...)
+  mod_MOM<-MOM(bLM, K=K, algorithm=alg, stochastic=stochastic, nboot=nboot, parallel=parallel,...)
 
 
   # estimators other than mom
@@ -354,6 +359,7 @@ plot.LM <- function(data, plot=TRUE, which=1:4, ...){
   # Cooks Distance (https://de.wikipedia.org/wiki/Cook-Abstand)
   cook_d<-r_t^2/(p+1)*(diag(H)/(1-diag(H)))
 
+  cook_tresh<-2*(p+1)/n
 
   if(plot){
 
@@ -383,15 +389,15 @@ plot.LM <- function(data, plot=TRUE, which=1:4, ...){
     g3 <- data.frame(x=1:n, y=cook_d) |>
       ggplot2::ggplot(ggplot2::aes(.data$x,.data$y))+
       ggplot2::geom_col() +
-      ggplot2::geom_hline(yintercept=4/n, color="red") +
+      ggplot2::geom_hline(yintercept=cook_tresh, color="red") +
       ggplot2::geom_text(
         ggplot2::aes(label=ifelse(.data$y>4/n,as.character(.data$x),"")),
         vjust=-0.8,size=3.5,color = "black"
       ) +
       ggplot2::ylim(c(0, max((4/n)*1.02,max(cook_d)*1.02)))+
-      ggplot2::labs(x="observations (row index)", y="Cooks Distance",
+      ggplot2::labs(x="x (index)",y="Cooks Distance",
            title="Cooks Distance",
-           subtitle=paste0("outlier idx: ",paste(as.character(1:n)[cook_d>4/n],collapse=","))
+           subtitle=paste0("outlier idx: ",paste(as.character(1:n)[cook_d>cook_tresh],collapse=","))
       )+
       ggplot2::theme_minimal()
 

@@ -11,7 +11,8 @@ LM(
   MOMalgorithm = c("GD", "ADMM"),
   K = NULL,
   stochastic = TRUE,
-  nboot = 100,
+  nboot = 0,
+  parallel = FALSE,
   ...
 )
 }
@@ -29,6 +30,8 @@ LM(
 \item{stochastic}{logical, controls if blocks in MOM-algorithm should be reshuffled each iteration}
 
 \item{nboot}{integer controlling how many times bootstrapped variance should should resample}
+
+\item{parallel}{TRUE/FALSE decides, if the bootstrapping (nboot>0) should be parallelized. Only use this if you know how to plan sequential vs. multisession}
 
 \item{...}{additional arguments passed to MOM-algorithm, see ?MOM for details.}
 }
