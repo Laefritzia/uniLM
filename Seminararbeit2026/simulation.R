@@ -48,7 +48,7 @@ dta_alg<-split(1:nrow(params),
 est<-c("MOM", "OLS", "MEST")
 
 # run two times for H0, H1, so its more clear
-mybeta<-c(0,0) # c(0,0)
+mybeta<-c(0,0) # c(1,3)
 
 # res_b and res_se are lists respectively, with three arrays for each estimate.
 # array has three dimensions: (other way than in python)
