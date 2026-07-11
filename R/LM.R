@@ -130,7 +130,7 @@ print.LMfit <- function(x, ...){
 #' @returns named list of class LM
 #' @import stats MASS
 #' @export
-LM <- function(data, formula, beta=NULL,
+LM <- function(data, formula, beta=c(0,0),
                MOMalgorithm=c("GD", "ADMM"),
                K=NULL,
                stochastic=TRUE,
@@ -140,14 +140,14 @@ LM <- function(data, formula, beta=NULL,
 
   # bare LM
   bLM<-if(!inherits(data, "LM")){
-    validate_LM(new_LM(list(data=data,formula=formula,beta=beta)),betaNULL=is.null(beta))
+    validate_LM(new_LM(list(data=data,formula=formula,beta=beta)),betaNULL=missing(beta))
   } else {
     validate_LM(data)
   }
 
   X <- model.matrix(bLM$formula, bLM$data[1,,drop=FALSE])
 
-  if(is.null(beta)){
+  if(missing(beta)){
     data$beta<-rep(0, ncol(X))
   }
 
