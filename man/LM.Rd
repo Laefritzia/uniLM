@@ -31,7 +31,7 @@ LM(
 
 \item{nboot}{integer controlling how many times bootstrapped variance should should resample}
 
-\item{parallel}{TRUE/FALSE decides, if the bootstrapping (nboot>0) should be parallelized. Only use this if you know how to plan sequential vs. multisession}
+\item{parallel}{TRUE/FALSE decides, if the bootstrapping (nboot\eqn{>0}) should be parallelized. Only use this if you know how to plan sequential vs. multisession}
 
 \item{...}{additional arguments passed to MOM-algorithm, see ?MOM for details.}
 }

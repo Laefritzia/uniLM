@@ -125,7 +125,7 @@ print.LMfit <- function(x, ...){
 #' @param K integer specifying number of blocks for MOM-algorithm. If NULL, then a grid search for optimal K will be run, see '?uniLM::adaptK'.
 #' @param stochastic logical, controls if blocks in MOM-algorithm should be reshuffled each iteration
 #' @param nboot integer controlling how many times bootstrapped variance should should resample
-#' @param parallel TRUE/FALSE decides, if the bootstrapping (nboot>0) should be parallelized. Only use this if you know how to plan sequential vs. multisession
+#' @param parallel TRUE/FALSE decides, if the bootstrapping (nboot\eqn{>0}) should be parallelized. Only use this if you know how to plan sequential vs. multisession
 #' @param ... additional arguments passed to MOM-algorithm, see ?MOM for details.
 #' @returns named list of class LM
 #' @import stats MASS
